@@ -11,3 +11,4 @@ export * from './Space';
 export * from './Table';
 export * from './Text';
 export * from './View';
+export * from './Icon';

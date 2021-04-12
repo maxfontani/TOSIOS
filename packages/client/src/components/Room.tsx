@@ -3,6 +3,7 @@ import { Inline } from './Inline';
 import React from 'react';
 import { Text } from './Text';
 import { isMobile } from 'react-device-detect';
+import { GameMode } from '@tosios/common/src/types';
 
 const ROOM = {
     border: '2px solid rgba(9,30,66,.1)',
@@ -25,7 +26,7 @@ export function Room(props: {
     roomMap: string;
     clients: number;
     maxClients: number;
-    mode: string;
+    mode: GameMode;
     onClick: (id: string) => void;
 }): React.ReactElement {
     const { id, roomName, roomMap, clients, maxClients, mode, onClick } = props;

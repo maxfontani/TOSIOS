@@ -6,7 +6,9 @@
         "@reach/router": "^1.2.1",
         "@tosios/common": "0.15.0",
         "colyseus.js": "^0.14.0",
+        "fontkit": "^1.8.1",
         "howler": "^2.2.1",
+        "node-emoji": "^1.10.0",
         "pixi-particles": "^4.2.0",
         "pixi-viewport": "^4.5.0",
         "pixi.js": "^5.2.0",
@@ -20,6 +22,7 @@
         "react-scripts": "^3.4.1"
     },
     "devDependencies": {
+        "@types/fontkit": "^1.8.0",
         "@types/howler": "^2.2.1",
         "@types/jest": "^24.0.25",
         "@types/node": "^13.1.2",

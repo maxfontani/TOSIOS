@@ -14,6 +14,7 @@ export interface HUDProps {
     roomName: string;
     playerId: string;
     playerName: string;
+    playerEmoji: string;
     playerLives: number;
     playerMaxLives: number;
     players: Models.PlayerJSON[];
@@ -41,6 +42,7 @@ export const HUD = React.memo(
             gameModeEndsAt,
             roomName,
             playerName,
+            playerEmoji,
             playerLives,
             playerMaxLives,
             players,
@@ -95,6 +97,9 @@ export const HUD = React.memo(
 
         return (
             <View flex center fullscreen style={styles.hud}>
+                {/* Menu */}
+                {menuOpened ? <Menu onClose={() => setMenuOpened(false)} onLeave={handleLeave} style={styles.menu}/> : null}
+
                 {/* Health */}
                 <Health name={playerName} lives={playerLives} maxLives={playerMaxLives} style={styles.health} />
 
@@ -126,8 +131,6 @@ export const HUD = React.memo(
                     />
                 ) : null}
 
-                {/* Menu */}
-                {menuOpened ? <Menu onClose={() => setMenuOpened(false)} onLeave={handleLeave} /> : null}
             </View>
         );
     },
@@ -137,6 +140,13 @@ const styles: { [key: string]: CSSProperties } = {
     hud: {
         padding: HUD_PADDING,
         pointerEvents: 'none',
+    },
+    menu:{
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        padding: 16,
+        zIndex: 99,
     },
     health: {
         position: 'absolute',

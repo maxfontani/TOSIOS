@@ -3,7 +3,6 @@ import {
     Button,
     GitHub,
     IListItem,
-    Inline,
     Input,
     Room,
     Select,
@@ -11,11 +10,11 @@ import {
     Space,
     Text,
     View,
+    Icon
 } from '../components';
 import { Constants, Types } from '@tosios/common';
 import React, { Component, Fragment } from 'react';
 import { RouteComponentProps, navigate } from '@reach/router';
-import { playerImage, titleImage } from '../images';
 import { Client } from 'colyseus.js';
 import { Helmet } from 'react-helmet';
 import { RoomAvailable } from 'colyseus.js/lib/Room';
@@ -32,16 +31,18 @@ const PlayersCountList: IListItem[] = Constants.ROOM_PLAYERS_SCALES.map((value) 
     title: `${value} players`,
 }));
 
-const GameModesList: IListItem[] = Constants.GAME_MODES.map((value) => ({
-    value,
-    title: value,
-}));
+// const GameModesList: IListItem[] = Constants.GAME_MODES.map((value) => ({
+//     value,
+//     title: value,
+// }));
 
 interface IProps extends RouteComponentProps {}
 
 interface IState {
     playerName: string;
+    playerEmoji: string;
     hasNameChanged: boolean;
+    hasEmojiChanged: boolean; 
     isNewRoom: boolean;
     roomName: string;
     roomMap: any;
@@ -59,12 +60,14 @@ export default class Home extends Component<IProps, IState> {
 
         this.state = {
             playerName: localStorage.getItem('playerName') || '',
+            playerEmoji: localStorage.getItem('playerEmoji') || '',
             hasNameChanged: false,
+            hasEmojiChanged: false,
             isNewRoom: false,
             roomName: localStorage.getItem('roomName') || '',
             roomMap: MapsList[0].value,
             roomMaxPlayers: PlayersCountList[0].value,
-            mode: GameModesList[0].value,
+            mode: 'deathmatch',
             rooms: [],
             timer: null,
         };
@@ -99,14 +102,23 @@ export default class Home extends Component<IProps, IState> {
 
     // HANDLERS
     handlePlayerNameChange = (event: any) => {
+        console.log(event.target.value);
         this.setState({
             playerName: event.target.value,
             hasNameChanged: true,
         });
     };
+    
+    handlePlayerEmojiChange = (target: any) => {
+        console.log(target.innerText);
+        this.setState({
+            playerEmoji: target.innerText,
+            hasEmojiChanged: true,
+        });
+    };
 
     handleNameSave = () => {
-        const { playerName } = this.state;
+        const { playerName, playerEmoji } = this.state;
         const analytics = useAnalytics();
 
         localStorage.setItem('playerName', playerName);
@@ -114,8 +126,14 @@ export default class Home extends Component<IProps, IState> {
             hasNameChanged: false,
         });
 
+        localStorage.setItem('playerEmoji', playerEmoji);
+        this.setState({
+            hasEmojiChanged: false,
+        });
+
         analytics.track({ category: 'User', action: 'Rename' });
     };
+
 
     handleRoomNameChange = (event: any) => {
         const roomName = event.target.value;
@@ -137,20 +155,24 @@ export default class Home extends Component<IProps, IState> {
     };
 
     handleCreateRoomClick = () => {
-        const { playerName, roomName, roomMap, roomMaxPlayers, mode } = this.state;
+        const { playerName, playerEmoji, roomName, roomMap, roomMaxPlayers, mode } = this.state;
         const analytics = useAnalytics();
 
         const options: Types.IRoomOptions = {
             playerName,
+            playerEmoji,
             roomName,
             roomMap,
             roomMaxPlayers,
-            mode,
+            mode
         };
 
-        analytics.track({ category: 'Game', action: 'Create' });
-
-        navigate(`/new${qs.stringify(options, true)}`);
+        if (playerName && playerEmoji) {
+            analytics.track({ category: 'Game', action: 'Create' });
+            navigate(`/new${qs.stringify(options, true)}`);
+        } else {
+            alert('Please enter a name AND choose a HERO')
+        }
     };
 
     handleCancelRoomClick = () => {
@@ -180,13 +202,14 @@ export default class Home extends Component<IProps, IState> {
                 style={{
                     padding: 32,
                     flexDirection: 'column',
+                    height: '100%'
                 }}
             >
                 <Helmet>
                     <title>{`${Constants.APP_TITLE} - Home`}</title>
                     <meta
                         name="description"
-                        content="The Open-Source IO Shooter is an open-source multiplayer game in the browser meant to be hostable, modifiable, and playable by anyone."
+                        content="TOTAL EMOJI MAYHEM."
                     />
                 </Helmet>
 
@@ -199,21 +222,20 @@ export default class Home extends Component<IProps, IState> {
                         maxWidth: '100%',
                     }}
                 >
-                    <img alt="TOSIOS" src={titleImage} />
+                    {/* <img alt="TOSIOS" src={titleImage} /> */}
                     <Space size="xs" />
-                    <Text style={{ color: 'white', fontSize: 13 }}>
-                        An open-source multiplayer game in the browser meant to be hostable, modifiable, and playable by
-                        anyone.
+                    <Text style={{ color: 'orange', fontFamily:'Bangers, cursive', fontSize: 48, fontWeight:900, margin: 0}}>
+                        MOJI WARZ
                     </Text>
                     <Space size="xxs" />
+                
+                    <Space size="m" />
+                    {this.renderName()}
+                    <Space size="m" />
+                    {this.renderRoom()}
+                    <Space size="m" />
+                    <GitHub />
                 </View>
-
-                <Space size="m" />
-                {this.renderName()}
-                <Space size="m" />
-                {this.renderRoom()}
-                <Space size="m" />
-                <GitHub />
             </View>
         );
     }
@@ -222,26 +244,47 @@ export default class Home extends Component<IProps, IState> {
         return (
             <Box
                 style={{
-                    width: 500,
+                    width: 400,
                     maxWidth: '100%',
                 }}
             >
-                <View flex>
-                    <img src={playerImage} alt="player" width={30} />
-                    <Inline size="thin" />
-                    <Text>Pick your name:</Text>
-                </View>
+                <Text style={{textAlign: 'center', fontWeight:900}}>
+                    Enter your NAME:
+                </Text>
                 <Space size="xs" />
                 <Input
                     value={this.state.playerName}
                     placeholder="Name"
                     maxLength={Constants.PLAYER_NAME_MAX}
                     onChange={this.handlePlayerNameChange}
+                    style={{
+                        textAlign: 'center',
+                        backgroundColor: 'black',
+                        color: 'white',
+                        fontWeight: 700
+                    }}
                 />
-                {this.state.hasNameChanged && (
+
+                <Space size="xs" />
+                <Text style={{textAlign: 'center', fontWeight:900}}>
+                    Choose your HERO:
+                </Text>
+                <Space size="xs" />
+                <View                
+                    flex
+                    center
+                    style={{
+                        justifyContent: 'space-between'
+                    }}
+                >
+                    <Icon color='blue' handlePlayerEmojiChange={this.handlePlayerEmojiChange}>&#129497;</Icon>
+                    <Icon color='red' handlePlayerEmojiChange={this.handlePlayerEmojiChange}>&#129499;</Icon>
+                    <Icon color='green'handlePlayerEmojiChange={this.handlePlayerEmojiChange}>&#129423;</Icon>
+                </View>
+                {this.state.hasNameChanged && this.state.playerName && (
                     <>
                         <Space size="xs" />
-                        <Button title="Save" text="Save" onClick={this.handleNameSave} />
+                        <Button title="Save" text="Save" onClick={this.handleNameSave} style={{backgroundColor: 'gold'}} />  
                     </>
                 )}
             </Box>
@@ -267,7 +310,7 @@ export default class Home extends Component<IProps, IState> {
     };
 
     renderNewRoom = () => {
-        const { isNewRoom, roomName, roomMap, roomMaxPlayers, mode } = this.state;
+        const { isNewRoom, roomName, roomMap, roomMaxPlayers } = this.state;
         const analytics = useAnalytics();
 
         return (
@@ -283,6 +326,9 @@ export default class Home extends Component<IProps, IState> {
                         title="Create new room"
                         text="+ New Room"
                         onClick={() => this.setState({ isNewRoom: true })}
+                        style={{
+                            fontWeight: 900
+                        }}
                     />
                 )}
                 {isNewRoom && (
@@ -332,7 +378,7 @@ export default class Home extends Component<IProps, IState> {
                         />
                         <Space size="s" />
 
-                        {/* Mode */}
+                        {/* GAME MODE
                         <Text>Game mode:</Text>
                         <Space size="xxs" />
                         <Select
@@ -347,7 +393,7 @@ export default class Home extends Component<IProps, IState> {
                                 });
                             }}
                         />
-                        <Space size="s" />
+                        <Space size="s" /> */}
 
                         {/* Button */}
                         <View>
@@ -402,3 +448,5 @@ export default class Home extends Component<IProps, IState> {
         });
     };
 }
+
+

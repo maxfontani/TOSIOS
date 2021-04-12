@@ -1,7 +1,7 @@
 import React, { CSSProperties, ReactNode } from 'react';
 import { Inline } from './Inline';
 
-const BUTTON_COLOR = '#375a7f';
+const BUTTON_COLOR = 'greenyellow';
 
 const BUTTON: CSSProperties = {
     fontSize: 16,
@@ -11,7 +11,7 @@ const BUTTON: CSSProperties = {
     border: 'none',
     cursor: 'pointer',
     backgroundColor: BUTTON_COLOR,
-    color: 'white',
+    color: 'black',
     minHeight: 48,
     width: '100%',
     maxWidth: '100%',

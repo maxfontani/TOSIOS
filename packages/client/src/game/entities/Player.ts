@@ -6,8 +6,8 @@ import { SmokeConfig, SmokeTexture } from '../assets/particles';
 import { BaseEntity } from '.';
 import { Emitter } from 'pixi-particles';
 
-const NAME_OFFSET = 4;
-const LIVES_OFFSET = 10;
+const NAME_OFFSET = 7;
+const LIVES_OFFSET = 6;
 const HURT_COLOR = 0xff0000;
 const HEAL_COLOR = 0x00ff00;
 const BULLET_DELAY_FACTOR = 1.1; // Add 10% to delay as server may lag behind sometimes (rarely)
@@ -21,12 +21,14 @@ const ZINDEXES = {
     INFOS: 4,
 };
 
-export type PlayerDirection = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+export type PlayerDirection = 'top' | 'right' | 'left' | 'bottom';
 
 export class Player extends BaseEntity {
     private _playerId: string = '';
 
     private _name: string = '';
+
+    private _emoji: string = '';
 
     private _lives: number = 0;
 
@@ -43,7 +45,7 @@ export class Player extends BaseEntity {
     // Computed
     private _isGhost: boolean = false;
 
-    private _direction: PlayerDirection = 'bottom-right';
+    private _direction: PlayerDirection = 'right';
 
     private _lastShootAt: number = 0;
 
@@ -51,9 +53,11 @@ export class Player extends BaseEntity {
 
     private _toY: number = 0;
 
-    private _weaponSprite: Sprite;
+    private _arrowSprite: Sprite;
 
     private _nameTextSprite: TextSprite;
+
+    private _emojiTextSprite: TextSprite;
 
     private _livesSprite: PlayerLivesSprite;
 
@@ -75,18 +79,29 @@ export class Player extends BaseEntity {
             zIndex: ZINDEXES.PLAYER,
         });
 
-        // Weapon
-        this._weaponSprite = new Sprite(WeaponTextures.staff);
-        this._weaponSprite.anchor.set(0, 0.5);
-        this._weaponSprite.position.set(player.radius, player.radius);
-        this._weaponSprite.zIndex = ZINDEXES.WEAPON_BACK;
-        this.container.addChild(this._weaponSprite);
+        this.sprite.visible = false;
+
+        // Arrow
+        
+        this._arrowSprite = new Sprite(WeaponTextures.arrow);
+        this._arrowSprite.scale.x = 0.3;
+        this._arrowSprite.scale.y = 0.3;
+        this._arrowSprite.anchor.set(0, 0.5);
+        this._arrowSprite.position.set(player.radius, player.radius);
+        this._arrowSprite.zIndex = ZINDEXES.INFOS;
+        this.container.addChild(this._arrowSprite);
 
         // Name
         this._nameTextSprite = new TextSprite(player.name, 8, 0.5, 1);
         this._nameTextSprite.position.set(player.radius, -NAME_OFFSET);
         this._nameTextSprite.zIndex = ZINDEXES.INFOS;
         this.container.addChild(this._nameTextSprite);
+
+        // Emoji
+        this._emojiTextSprite = new TextSprite(player.emoji, 24, 0, 0);
+        this._emojiTextSprite.position.set(2, 0);
+        this._emojiTextSprite.zIndex = ZINDEXES.INFOS;
+        this.container.addChild(this._emojiTextSprite);
 
         // Lives
         this._livesSprite = new PlayerLivesSprite(0.5, 1, 8, player.maxLives, player.lives);
@@ -119,6 +134,7 @@ export class Player extends BaseEntity {
         this.toY = player.y;
         this.rotation = player.rotation;
         this.name = player.name;
+        this.emoji = player.emoji;
         this.color = player.color;
         this.lives = player.lives;
         this.maxLives = player.maxLives;
@@ -154,18 +170,20 @@ export class Player extends BaseEntity {
         const isAlive = this.lives > 0;
 
         // Player
-        this.sprite.alpha = isAlive ? 1 : DEAD_ALPHA;
-        this.sprite.textures = isAlive ? PlayerTextures.playerIdleTextures : PlayerTextures.playerDeadTextures;
-        this.sprite.anchor.set(0.5);
-        this.sprite.width = this.body.width;
-        this.sprite.height = this.body.height;
-        this.sprite.play();
+
+        // this.sprite.alpha = isAlive ? 1 : DEAD_ALPHA;
+        // this.sprite.textures = isAlive ? PlayerTextures.playerIdleTextures : PlayerTextures.playerDeadTextures;
+        // this.sprite.anchor.set(0.5);
+        // this.sprite.width = this.body.width;
+        // this.sprite.height = this.body.height;
+        // this.sprite.play();
 
         // Weapon
-        this._weaponSprite.visible = this.isGhost ? isAlive && Constants.DEBUG : isAlive;
+        // this._arrowSprite.visible = this.isGhost ? isAlive && Constants.DEBUG : isAlive;
 
         // Name
         this._nameTextSprite.alpha = isAlive ? 1 : DEAD_ALPHA;
+        this._emojiTextSprite.alpha = isAlive ? 1 : DEAD_ALPHA;
 
         // Lives
         this._livesSprite.alpha = isAlive ? 1 : DEAD_ALPHA;
@@ -263,6 +281,11 @@ export class Player extends BaseEntity {
         this._nameTextSprite.text = name;
     }
 
+    set emoji(emoji: string) {
+        this._emoji = emoji;
+        this._emojiTextSprite.text = emoji;
+    }
+
     set lives(lives: number) {
         if (this._lives === lives) {
             return;
@@ -298,7 +321,7 @@ export class Player extends BaseEntity {
         // Therefore, adding a delay fixes the problem for now.
         setTimeout(() => {
             this.sprite.tint = utils.string2hex(color);
-            this._weaponSprite.tint = utils.string2hex(color);
+            this._arrowSprite.tint = utils.string2hex(color);
         }, 300);
     }
 
@@ -314,28 +337,29 @@ export class Player extends BaseEntity {
         this._direction = getDirection(rotation);
 
         switch (this._direction) {
-            case 'top-left':
-                this.sprite.scale.x = -2;
-                this._weaponSprite.zIndex = ZINDEXES.WEAPON_BACK;
+            case 'top':
+                this._arrowSprite.angle = 0;
+                this._arrowSprite.position.set(8,1)
+                break;      
+            case 'left':
+                this._arrowSprite.angle = -90;
+                this._arrowSprite.position.set(0,24)
                 break;
-            case 'top-right':
-                this.sprite.scale.x = 2;
-                this._weaponSprite.zIndex = ZINDEXES.WEAPON_BACK;
+            case 'right':
+                this._arrowSprite.angle = 90;
+                this._arrowSprite.position.set(32,10)
                 break;
-            case 'bottom-left':
-                this.sprite.scale.x = -2;
-                this._weaponSprite.zIndex = ZINDEXES.WEAPON_FRONT;
-                break;
-            case 'bottom-right':
-                this.sprite.scale.x = 2;
-                this._weaponSprite.zIndex = ZINDEXES.WEAPON_FRONT;
+            case 'bottom':
+                this._arrowSprite.angle = 180;
+                this._arrowSprite.position.set(22,32)
                 break;
             default:
                 break;
         }
 
-        this._rotation = rotation;
-        this._weaponSprite.rotation = rotation;
+        // Make rotation smooth
+        // this._rotation = rotation;
+        // this._arrowSprite.rotation = rotation;
         this.container.sortChildren();
     }
 
@@ -406,33 +430,32 @@ export class Player extends BaseEntity {
 }
 
 /**
- * Return a texture depending on the number of lives.
+ * Return a texture depending on the number of lives and emoji.
  */
 const getTexture = (lives: number): Texture[] => {
-    return lives > 0 ? PlayerTextures.playerIdleTextures : PlayerTextures.playerDeadTextures;
+    return PlayerTextures.playerDeadTextures
+    // return lives > 0 ? PlayerTextures.playerIdleTextures : PlayerTextures.playerDeadTextures;
 };
 
 /**
  * Get a direction given a rotation.
  */
 function getDirection(rotation: number): PlayerDirection {
-    const top = -(Math.PI / 2);
-    const right = 0;
-    const bottom = Math.PI / 2;
 
-    // Top
-    if (rotation < right) {
-        if (rotation > top) {
-            return 'top-right';
-        }
+    // Right = 0
+    const bottom_right = Math.PI / 4;
 
-        return 'top-left';
+    if (Math.abs(rotation) < bottom_right) {
+        return 'right';
     }
 
-    // Bottom
-    if (rotation < bottom) {
-        return 'bottom-right';
+    if (Math.abs(rotation) > 3 * bottom_right) {
+        return 'left';
     }
 
-    return 'bottom-left';
+    if (rotation < 0) {
+        return 'top';
+    }
+
+    return 'bottom';
 }

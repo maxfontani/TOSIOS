@@ -482,6 +482,7 @@ export class Game {
             radius: player.body.radius,
             rotation: player.rotation,
             name: player.name,
+            emoji: player.emoji,
             color: player.color,
             lives: player.lives,
             maxLives: player.maxLives,

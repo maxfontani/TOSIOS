@@ -191,7 +191,7 @@ export class GameState extends Schema {
     //
     // Players: single
     //
-    playerAdd(id: string, name: string) {
+    playerAdd(id: string, name: string, emoji: string) {
         const spawner = this.getSpawnerRandomly();
         const player = new Player(
             id,
@@ -201,6 +201,7 @@ export class GameState extends Schema {
             0,
             Constants.PLAYER_MAX_LIVES,
             name || id,
+            emoji
         );
 
         // Add the user to the "red" team by default

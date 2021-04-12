@@ -6,8 +6,8 @@ import { useAnalytics } from '../../hooks';
 /**
  * A menu displaying important room actions and informations.
  */
-export function Menu(props: { onClose?: () => void; onLeave?: () => void }): React.ReactElement {
-    const { onClose, onLeave } = props;
+export function Menu(props: { onClose?: () => void; onLeave?: () => void; style?: CSSProperties;}): React.ReactElement {
+    const { onClose, onLeave, style } = props;
     const roomURL = window.location.href;
     const inputRef = React.useRef<HTMLInputElement>(null);
     const analytics = useAnalytics();
@@ -29,7 +29,7 @@ export function Menu(props: { onClose?: () => void; onLeave?: () => void }): Rea
     };
 
     return (
-        <View fullscreen flex center backdrop style={styles.menu}>
+        <View fullscreen flex center backdrop style={{ ...style, ...styles.menu }}>
             <Box style={styles.box}>
                 {/* Share */}
                 <Text style={styles.sectionTitle}>Share</Text>
@@ -128,23 +128,19 @@ export function Menu(props: { onClose?: () => void; onLeave?: () => void }): Rea
 }
 
 const styles: { [key: string]: CSSProperties } = {
-    menu: {
-        position: 'fixed',
-        padding: 16,
-        zIndex: 1000,
-    },
     box: {
+        position: 'relative',
+        backgroundColor: 'lightpink',
         boxSizing: 'border-box',
-        maxHeight: '100%',
         maxWidth: 500,
-        overflowY: 'scroll',
+        overflowY: 'auto',
     },
     sectionTitle: {
         color: 'black',
         fontSize: 18,
     },
     sectionDescription: {
-        color: '#A9A9A9',
+        color: '#444d56',
     },
     sectionKey: {
         fontSize: 14,

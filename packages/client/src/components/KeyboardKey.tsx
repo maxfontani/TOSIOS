@@ -9,11 +9,11 @@ export function KeyboardKey(props: { value: string }): React.ReactElement {
 const styles: { [key: string]: CSSProperties } = {
     keyboardKey: {
         display: 'inline-flex',
-        font: '11px SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace',
+        font: '11px Consolas, monospace, Liberation Mono, Menlo',
         lineHeight: 10,
         color: '#444d56',
-        backgroundColor: '#fafbfc',
-        border: '1px solid #d1d5da',
+        backgroundColor: 'tomato',
+        border: '1px solid black',
         borderRadius: 3,
         boxShadow: 'inset 0 -1px 0 #d1d5da',
         fontSize: 24,

@@ -10,6 +10,7 @@ export interface PlayerJSON {
     rotation: number;
     playerId: string;
     name: string;
+    emoji: string;
     lives: number;
     maxLives: number;
     team?: Teams;

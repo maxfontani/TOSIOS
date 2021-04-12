@@ -9,6 +9,9 @@ export class Player extends Circle {
     @type('string')
     public name: string;
 
+    @type('string')
+    public emoji: string;
+
     @type('number')
     public lives: number;
 
@@ -42,6 +45,7 @@ export class Player extends Circle {
         lives: number,
         maxLives: number,
         name: string,
+        emoji: string,
         team?: Types.Teams,
     ) {
         super(x, y, radius);
@@ -49,6 +53,7 @@ export class Player extends Circle {
         this.lives = lives;
         this.maxLives = maxLives;
         this.name = validateName(name);
+        this.emoji = emoji;
         this.team = team;
         this.color = team ? getTeamColor(team) : '#FFFFFF';
         this.kills = 0;

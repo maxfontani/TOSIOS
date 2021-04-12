@@ -58,9 +58,9 @@ export class GameRoom extends Room<GameState> {
     }
 
     onJoin(client: Client, options: Types.IPlayerOptions) {
-        this.state.playerAdd(client.sessionId, options.playerName);
+        this.state.playerAdd(client.sessionId, options.playerName, options.playerEmoji);
 
-        console.log(`${new Date().toISOString()} [Join] id=${client.sessionId} player=${options.playerName}`);
+        console.log(`${new Date().toISOString()} [Join] id=${client.sessionId} player=${options.playerName} emoji=${options.playerEmoji}`);
     }
 
     onLeave(client: Client) {

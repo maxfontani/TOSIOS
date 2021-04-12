@@ -44,6 +44,7 @@ export default class Match extends Component<IProps, IState> {
                 roomName: '',
                 playerId: '',
                 playerName: '',
+                playerEmoji: '',
                 playerLives: 0,
                 playerMaxLives: 0,
                 players: [],
@@ -80,6 +81,7 @@ export default class Match extends Component<IProps, IState> {
             // The only thing to pass when joining an existing room is a player's name
             options = {
                 playerName: localStorage.getItem('playerName'),
+                playerEmoji: localStorage.getItem('playerEmoji')
             };
         }
 
@@ -316,6 +318,7 @@ export default class Match extends Component<IProps, IState> {
                     gameModeEndsAt={hud.gameModeEndsAt}
                     roomName={hud.roomName}
                     playerName={hud.playerName}
+                    playerEmoji={hud.playerEmoji}
                     playerLives={hud.playerLives}
                     playerMaxLives={hud.playerMaxLives}
                     players={hud.players}
@@ -342,10 +345,14 @@ export default class Match extends Component<IProps, IState> {
                     }}
                     onMove={(event: any, data: any) => {
                         const cardinal = Maths.degreeToCardinal(data.angle.degree);
-                        this.game.inputs.up = cardinal === 'NW' || cardinal === 'N' || cardinal === 'NE';
-                        this.game.inputs.right = cardinal === 'NE' || cardinal === 'E' || cardinal === 'SE';
-                        this.game.inputs.down = cardinal === 'SE' || cardinal === 'S' || cardinal === 'SW';
-                        this.game.inputs.left = cardinal === 'SW' || cardinal === 'W' || cardinal === 'NW';
+                        this.game.inputs.up = cardinal === 'N'
+                        this.game.inputs.right = cardinal === 'E'
+                        this.game.inputs.down = cardinal === 'S'
+                        this.game.inputs.left = cardinal === 'W'
+                        // this.game.inputs.up = cardinal === 'NW' || cardinal === 'N' || cardinal === 'NE';
+                        // this.game.inputs.right = cardinal === 'NE' || cardinal === 'E' || cardinal === 'SE';
+                        // this.game.inputs.down = cardinal === 'SE' || cardinal === 'S' || cardinal === 'SW';
+                        // this.game.inputs.left = cardinal === 'SW' || cardinal === 'W' || cardinal === 'NW';
                     }}
                 />
 

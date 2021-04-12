@@ -5,7 +5,7 @@ import fire2 from './fire-2.png';
 import fire3 from './fire-3.png';
 import fire4 from './fire-4.png';
 import fire5 from './fire-5.png';
-import staffImage from './staff.png';
+import arrowImage from './arrow.png';
 
 // Bullet
 const bullet = Texture.from(bulletImage);
@@ -18,6 +18,6 @@ for (let i = 0; i < fireImages.length; i++) {
 }
 
 // Staff
-const staff = Texture.from(staffImage);
+const arrow = Texture.from(arrowImage);
 
-export { bullet, fire, staff };
+export { bullet, fire, arrow };
