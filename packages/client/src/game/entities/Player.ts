@@ -99,7 +99,7 @@ export class Player extends BaseEntity {
 
         // Emoji
         this._emojiTextSprite = new TextSprite(player.emoji, 24, 0, 0);
-        this._emojiTextSprite.position.set(2, 0);
+        this._emojiTextSprite.position.set(2, 4);
         this._emojiTextSprite.zIndex = ZINDEXES.INFOS;
         this.container.addChild(this._emojiTextSprite);
 

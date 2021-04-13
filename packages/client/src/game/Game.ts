@@ -179,19 +179,19 @@ export class Game {
         // Move
         const dir = new Geometry.Vector2(0, 0);
         if (this.inputs.up || this.inputs.down || this.inputs.left || this.inputs.right) {
-            if (this.inputs.up) {
+            if (this.inputs.up && !this.inputs.left && !this.inputs.right) {
                 dir.y -= 1;
             }
 
-            if (this.inputs.down) {
+            if (this.inputs.down && !this.inputs.left && !this.inputs.right) {
                 dir.y += 1;
             }
 
-            if (this.inputs.left) {
+            if (this.inputs.left && !this.inputs.up && !this.inputs.down) {
                 dir.x -= 1;
             }
 
-            if (this.inputs.right) {
+            if (this.inputs.right && !this.inputs.up && !this.inputs.down) {
                 dir.x += 1;
             }
 
@@ -417,7 +417,8 @@ export class Game {
     };
 
     private shoot = () => {
-        if (!this.me || this.state !== 'game' || !this.me.canShoot()) {
+        //add !this.me.canShoot() || this.state !== 'game'  to disable when dead
+        if (!this.me) {
             return;
         }
 

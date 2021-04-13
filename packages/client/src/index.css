@@ -20,8 +20,10 @@ h1 {
 p,
 input,
 select,
+textarea,
 button {
     margin: 0;
+    font-family: inherit;
 }
 
 a {

@@ -60,7 +60,7 @@ export default class Home extends Component<IProps, IState> {
 
         this.state = {
             playerName: localStorage.getItem('playerName') || '',
-            playerEmoji: localStorage.getItem('playerEmoji') || '',
+            playerEmoji: '',
             hasNameChanged: false,
             hasEmojiChanged: false,
             isNewRoom: false,
@@ -110,11 +110,17 @@ export default class Home extends Component<IProps, IState> {
     };
     
     handlePlayerEmojiChange = (target: any) => {
-        console.log(target.innerText);
-        this.setState({
-            playerEmoji: target.innerText,
-            hasEmojiChanged: true,
-        });
+        if (this.state.playerEmoji === target.innerText) {
+            this.setState({
+                playerEmoji: '',
+                hasEmojiChanged: true,
+            }); 
+        } else {
+            this.setState({
+                playerEmoji: target.innerText,
+                hasEmojiChanged: true,
+            });
+        }
     };
 
     handleNameSave = () => {
@@ -144,6 +150,7 @@ export default class Home extends Component<IProps, IState> {
     };
 
     handleRoomClick = (roomId: string) => {
+        const { playerName, playerEmoji } = this.state;
         const analytics = useAnalytics();
 
         analytics.track({
@@ -151,7 +158,12 @@ export default class Home extends Component<IProps, IState> {
             action: 'Join',
         });
 
-        navigate(`/${roomId}`);
+        if (playerName && playerEmoji) {
+            this.handleNameSave()
+            navigate(`/${roomId}`);
+        } else {
+            alert('Please enter a name AND choose a HERO')
+        }
     };
 
     handleCreateRoomClick = () => {
@@ -277,16 +289,16 @@ export default class Home extends Component<IProps, IState> {
                         justifyContent: 'space-between'
                     }}
                 >
-                    <Icon color='blue' handlePlayerEmojiChange={this.handlePlayerEmojiChange}>&#129497;</Icon>
-                    <Icon color='red' handlePlayerEmojiChange={this.handlePlayerEmojiChange}>&#129499;</Icon>
-                    <Icon color='green'handlePlayerEmojiChange={this.handlePlayerEmojiChange}>&#129423;</Icon>
+                    <Icon color='blue' handlePlayerEmojiChange={this.handlePlayerEmojiChange} playerEmoji={this.state.playerEmoji}>&#129497;</Icon>
+                    <Icon color='red' handlePlayerEmojiChange={this.handlePlayerEmojiChange} playerEmoji={this.state.playerEmoji}>&#129499;</Icon>
+                    <Icon color='green'handlePlayerEmojiChange={this.handlePlayerEmojiChange} playerEmoji={this.state.playerEmoji}>&#129423;</Icon>
                 </View>
-                {this.state.hasNameChanged && this.state.playerName && (
+                {/* {this.state.hasNameChanged && this.state.playerName && (
                     <>
                         <Space size="xs" />
                         <Button title="Save" text="Save" onClick={this.handleNameSave} style={{backgroundColor: 'gold'}} />  
                     </>
-                )}
+                )} */}
             </Box>
         );
     };
@@ -341,6 +353,7 @@ export default class Home extends Component<IProps, IState> {
                             value={roomName}
                             maxLength={Constants.ROOM_NAME_MAX}
                             onChange={this.handleRoomNameChange}
+                            style={{backgroundColor: '#efefef'}}
                         />
                         <Space size="s" />
 
@@ -358,6 +371,8 @@ export default class Home extends Component<IProps, IState> {
                                     label: event.target.value,
                                 });
                             }}
+                            style={{backgroundColor: '#efefef'}}
+
                         />
                         <Space size="s" />
 
@@ -375,6 +390,8 @@ export default class Home extends Component<IProps, IState> {
                                     value: event.target.value,
                                 });
                             }}
+                            style={{backgroundColor: '#efefef'}}
+
                         />
                         <Space size="s" />
 
@@ -397,9 +414,9 @@ export default class Home extends Component<IProps, IState> {
 
                         {/* Button */}
                         <View>
-                            <Button title="Create room" text="Create" onClick={this.handleCreateRoomClick} />
+                            <Button title="Create room" text="Create" bold onClick={this.handleCreateRoomClick} />
                             <Space size="xs" />
-                            <Button title="Cancel" text="Cancel" reversed onClick={this.handleCancelRoomClick} />
+                            <Button title="Cancel" text="Cancel" reversed onClick={this.handleCancelRoomClick} style={{color: 'black'}} />
                         </View>
                     </View>
                 )}

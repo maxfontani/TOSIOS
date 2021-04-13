@@ -132,7 +132,9 @@ export class GameState extends Schema {
         this.setPlayersPositionRandomly();
         this.setPlayersActive(true);
         this.propsAdd(Constants.FLASKS_COUNT);
-        this.monstersAdd(Constants.MONSTERS_COUNT);
+        if (this.game.mapName !== 'neon') {
+            this.monstersAdd(Constants.MONSTERS_COUNT);
+        } 
         this.onMessage({
             type: 'start',
             from: 'server',

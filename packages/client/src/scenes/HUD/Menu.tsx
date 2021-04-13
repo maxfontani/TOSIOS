@@ -39,7 +39,7 @@ export function Menu(props: { onClose?: () => void; onLeave?: () => void; style?
                 <View flex center>
                     <Input ref={inputRef} value={roomURL} />
                     <Inline size="xs" />
-                    <Button text="Copy" style={{ width: 'fit-content' }} onClick={copyToClipboard} />
+                    <Button text="Copy" style={{ width: 'fit-content', backgroundColor: 'gold' }} onClick={copyToClipboard} />
                 </View>
                 <Space size="m" />
 
@@ -114,11 +114,20 @@ export function Menu(props: { onClose?: () => void; onLeave?: () => void; style?
                 <Space size="m" />
 
                 <View flex>
-                    <Button onClick={onLeave} icon={ArrowLeft}>
+                    <Button 
+                        onClick={onLeave} 
+                        icon={ArrowLeft}
+                        style={{ border: '2px solid black', backgroundColor: 'gold' }}
+                    >
                         Leave
                     </Button>
                     <Inline size="xxs" />
-                    <Button reversed onClick={onClose}>
+                    <Button 
+                        reversed 
+                        onClick={onClose}
+                        style={{ borderColor: 'black', color: 'black', backgroundColor: 'gold' }}
+
+                    >
                         Close
                     </Button>
                 </View>
@@ -130,7 +139,7 @@ export function Menu(props: { onClose?: () => void; onLeave?: () => void; style?
 const styles: { [key: string]: CSSProperties } = {
     box: {
         position: 'relative',
-        backgroundColor: 'lightpink',
+        backgroundColor: 'lightgreen',
         boxSizing: 'border-box',
         maxWidth: 500,
         overflowY: 'auto',

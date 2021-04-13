@@ -1,25 +1,38 @@
-import React, { CSSProperties, ReactNode } from 'react';
+import React, { CSSProperties, ReactNode, useEffect } from 'react';
 
-export function Icon(props: { style?: CSSProperties; children: ReactNode; color?: IconColor; handlePlayerEmojiChange: any }): React.ReactElement {
-    const { style, children, color, handlePlayerEmojiChange } = props;
+export function Icon(props: { style?: CSSProperties; children: ReactNode; color?: IconColor; handlePlayerEmojiChange: any; playerEmoji: string; }): React.ReactElement {
+    const { style, children, color, handlePlayerEmojiChange, playerEmoji } = props;
     const [hovered, setHovered] = React.useState(false);
+    const [active, setActive] = React.useState(false);
 
     const ICON_HOVERED: CSSProperties = {
         cursor: 'pointer',
         background: (color && ICON_COLORS[color]) || GREEN,
         transform: 'scale(1.1)'
     }
+
+    useEffect(() => {
+        if (children === playerEmoji) {
+            setActive(true)
+        } else {
+            setActive(false)
+        }
+    }, [playerEmoji])
     
     return (
         <div
             style={{
                 ...ICON,
                 ...style,
-                ...(hovered && ICON_HOVERED)
+                ...(hovered && ICON_HOVERED),
+                ...(active && ICON_HOVERED)
             }}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
-            onClick={e => handlePlayerEmojiChange(e.target)}
+            onClick={e => {
+
+                handlePlayerEmojiChange(e.target)
+            }}
         >
             {children}
         </div>

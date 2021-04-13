@@ -171,7 +171,7 @@ const styles: { [key: string]: CSSProperties } = {
     box: {
         boxSizing: 'border-box',
         maxHeight: '100%',
-        overflowY: 'scroll',
+        overflowY: 'auto',
     },
     playerDead: {
         opacity: 0.2,

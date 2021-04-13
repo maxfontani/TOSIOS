@@ -1,3 +1,4 @@
+import { Types } from '@tosios/common';
 import React, { CSSProperties, ReactNode } from 'react';
 import { Inline } from './Inline';
 
@@ -30,6 +31,10 @@ const BUTTON_REVERSED: CSSProperties = {
     border: `2px solid ${BUTTON_COLOR}`,
 };
 
+const BUTTON_BOLD: CSSProperties = {
+    fontWeight: 'bolder'
+};
+
 export function Button(props: {
     type?: 'button' | 'submit' | 'reset';
     text?: string;
@@ -37,10 +42,11 @@ export function Button(props: {
     style?: CSSProperties;
     icon?: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
     title?: string;
+    bold?: boolean;
     reversed?: boolean;
     onClick?: () => void;
 }): React.ReactElement {
-    const { type = 'button', text, children, style, icon: Icon, title, reversed = false, onClick } = props;
+    const { type = 'button', text, children, style, icon: Icon, title, reversed = false, bold = false, onClick } = props;
     const [hovered, setHovered] = React.useState(false);
 
     return (
@@ -50,6 +56,7 @@ export function Button(props: {
                 ...BUTTON,
                 ...(hovered && BUTTON_HOVERED),
                 ...(reversed && BUTTON_REVERSED),
+                ...(bold && BUTTON_BOLD),
                 ...style,
             }}
             onMouseEnter={() => setHovered(true)}
