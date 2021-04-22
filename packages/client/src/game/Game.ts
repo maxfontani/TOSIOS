@@ -171,7 +171,7 @@ export class Game {
         this.updatePlayers();
         this.updateMonsters();
         this.updateBullets();
-
+      
         this.playersManager.sortChildren();
     };
 
@@ -212,7 +212,7 @@ export class Game {
     private updatePlayers = () => {
         let distance;
 
-        for (const player of this.playersManager.getAll()) {
+        for (const player of this.playersManager.getAll()) {     
             distance = Maths.getDistance(player.x, player.y, player.toX, player.toY);
             if (distance > 0.01) {
                 player.x = Maths.lerp(player.x, player.toX, TOREMOVE_MAX_FPS_MS / TOREMOVE_AVG_LAG);
@@ -348,34 +348,36 @@ export class Game {
             return;
         }
 
-        const action: Models.ActionJSON = {
-            type: 'move',
-            ts: Date.now(),
-            playerId: this.me.playerId,
-            value: {
-                x: dir.x,
-                y: dir.y,
-            },
-        };
+        // Actually move the player if the path is free
+        if (this.walls.noWallsAhead(dir.x, dir.y, this.me.body)) { 
 
-        // Send the action to the server
-        this.onActionSend(action);
+            // Check the move timeout
+            if (!this.me.canMove()) {
+                return;
+            }
+    
+            this.me.lastMoveAt = Date.now();
+    
+            const action: Models.ActionJSON = {
+                type: 'move',
+                ts: Date.now(),
+                playerId: this.me.playerId,
+                value: {
+                    x: dir.x,
+                    y: dir.y,
+                },
+            };
 
-        // Save the action for reconciliation
-        this.moveActions.push(action);
-
-        // Actually move the player
-        this.me.move(dir.x, dir.y, Constants.PLAYER_SPEED);
-
-        // Collisions: Map
-        const clampedPosition = this.map.clampCircle(this.me.body);
-        this.me.x = clampedPosition.x;
-        this.me.y = clampedPosition.y;
-
-        // Collisions: Walls
-        const correctedPosition = this.walls.correctWithCircle(this.me.body);
-        this.me.x = correctedPosition.x;
-        this.me.y = correctedPosition.y;
+            // Send the action to the server
+            this.onActionSend(action);
+            
+            // Save the action for reconciliation
+            this.moveActions.push(action);
+            this.me.move(dir.x, dir.y, Constants.PLAYER_SPEED);
+        } else {
+            dir.x= 0;
+            dir.y = 0;
+        }
     };
 
     private rotate = () => {
@@ -416,41 +418,72 @@ export class Game {
         }
     };
 
+    // Use Ability 
     private shoot = () => {
-        //add !this.me.canShoot() || this.state !== 'game'  to disable when dead
+        //add this.state !== 'game'  to disable shooting when dead
+      
         if (!this.me) {
             return;
         }
 
-        const bulletX = this.me.x + Math.cos(this.me.rotation) * Constants.PLAYER_WEAPON_SIZE;
-        const bulletY = this.me.y + Math.sin(this.me.rotation) * Constants.PLAYER_WEAPON_SIZE;
+        const ability = this.me.canShoot();
+      
+        switch (ability) {
+            case false:
+                return;
+            case 'shoot':
+                console.log('SHOOOT!!');
+                const bulletX = this.me.x + Math.cos(this.me.rotation) * Constants.PLAYER_WEAPON_SIZE;
+                const bulletY = this.me.y + Math.sin(this.me.rotation) * Constants.PLAYER_WEAPON_SIZE;
 
-        this.me.lastShootAt = Date.now();
+                this.me.lastShootAt = Date.now();
 
-        this.bulletsManager.addOrCreate(
-            {
-                x: bulletX,
-                y: bulletY,
-                radius: Constants.BULLET_SIZE,
-                rotation: this.me.rotation,
-                active: true,
-                fromX: bulletX,
-                fromY: bulletY,
-                playerId: this.me.playerId,
-                team: this.me.team,
-                color: this.me.color,
-                shotAt: this.me.lastShootAt,
-            },
-            this.particlesContainer,
-        );
-        this.onActionSend({
-            type: 'shoot',
-            ts: Date.now(),
-            playerId: this.me.playerId,
-            value: {
-                angle: this.me.rotation,
-            },
-        });
+                this.bulletsManager.addOrCreate(
+                    {
+                        x: bulletX,
+                        y: bulletY,
+                        radius: Constants.BULLET_SIZE,
+                        rotation: this.me.rotation,
+                        active: true,
+                        fromX: bulletX,
+                        fromY: bulletY,
+                        playerId: this.me.playerId,
+                        team: this.me.team,
+                        color: this.me.color,
+                        shotAt: this.me.lastShootAt,
+                    },
+                    this.particlesContainer,
+                );
+
+                this.onActionSend({
+                    type: 'shoot',
+                    ts: Date.now(),
+                    playerId: this.me.playerId,
+                    value: {
+                        angle: this.me.rotation,
+                    },
+                });
+                break;
+            case 'invisibility':
+                console.log('INVIZZ!!');
+
+                this.me.toggleAbilityIsActive();
+
+                this.onActionSend({
+                    type: 'shoot',
+                    ts: Date.now(),
+                    playerId: this.me.playerId,
+                    value: {
+                        angle: this.me.rotation,
+                    },
+                });
+                break;
+            case 'charge':
+                console.log('CHARGE!!');
+                break;  
+            default:
+                break;
+        }
     };
 
     // SPAWNERS
@@ -472,6 +505,9 @@ export class Game {
     setScreenSize = (screenWidth: number, screenHeight: number) => {
         this.app.renderer.resize(screenWidth, screenHeight);
         this.viewport.resize(screenWidth, screenHeight, this.map.width, this.map.height);
+        // Make the worldview responsive and centered
+        this.viewport.fitWorld();  
+        this.viewport.moveCorner(-((this.viewport.screenWidthInWorldPixels-this.viewport.worldWidth)/2),0);       
     };
 
     // GETTERS
@@ -484,6 +520,8 @@ export class Game {
             rotation: player.rotation,
             name: player.name,
             emoji: player.emoji,
+            ability: player.ability,
+            abilityIsActive: player.abilityIsActive,
             color: player.color,
             lives: player.lives,
             maxLives: player.maxLives,
@@ -546,9 +584,10 @@ export class Game {
         // If the player is "you"
         if (isMe) {
             this.me = new Player(attributes, false, this.particlesContainer);
-
             this.playersManager.addChild(this.me.container);
-            this.viewport.follow(this.me.container);
+            // The camera follows the player
+            // this.viewport.follow(this.me.container); 
+
         }
     };
 
@@ -565,6 +604,16 @@ export class Game {
             this.me.color = attributes.color;
             this.me.kills = attributes.kills;
             this.me.team = attributes.team;
+            this.me.abilityIsActive = attributes.abilityIsActive;
+
+            // Make the players see their own emoji when invisible
+            this.me.emojiAlpha = this.me.abilityIsActive ? 0.3 : 1;
+
+            // If the player is dead, a special texture is displayed
+            if (!this.me.isAlive) this.me.emojiAlpha = 0;
+
+            // Only the players own direction arrow is visible
+            this.me.arrowAlpha = 1;
 
             if (attributes.ack !== this.me.ack) {
                 this.me.ack = attributes.ack;
@@ -614,6 +663,7 @@ export class Game {
             player.color = attributes.color;
             player.kills = attributes.kills;
             player.team = attributes.team;
+            player.abilityIsActive = attributes.abilityIsActive;
 
             // Update rotation
             player.rotation = attributes.rotation;
@@ -684,9 +734,13 @@ export class Game {
 
     // COLYSEUS: Bullets
     bulletAdd = (bulletId: string, attributes: Models.BulletJSON) => {
+        console.log('BUL ADD');
+        
         if ((this.me && this.me.playerId === attributes.playerId) || !attributes.active) {
             return;
         }
+
+        console.log('BUL ADDED +');
 
         this.bulletsManager.addOrCreate(attributes, this.particlesContainer);
     };

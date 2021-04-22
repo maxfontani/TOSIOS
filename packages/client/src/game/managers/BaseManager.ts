@@ -1,5 +1,6 @@
 import { BaseEntity } from '../entities/BaseEntity';
 import { Container } from 'pixi.js';
+import { Models } from '@tosios/common';
 
 export class BaseManager<T extends BaseEntity> extends Container {
     protected container: Container;

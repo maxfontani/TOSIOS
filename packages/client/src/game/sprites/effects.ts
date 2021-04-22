@@ -25,3 +25,10 @@ export const blink = (object: DisplayObject) => {
         }
     }, BLINK_DURATION);
 };
+
+export const hide = (object: DisplayObject, duration: number) => {
+    object.alpha = 0
+    setTimeout(() => {
+        object.alpha = 1
+    }, duration)
+};

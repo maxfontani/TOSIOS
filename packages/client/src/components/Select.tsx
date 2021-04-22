@@ -18,17 +18,18 @@ export interface IListItem {
     title: string;
 }
 
+
 export function Select(props: {
     value?: any;
-    values: IListItem[];
+    values: string[] | number[];
     style?: CSSProperties;
     onChange?: (event: SyntheticEvent) => void;
 }): React.ReactElement {
     const { value, values = [], style, onChange } = props;
 
-    const list = values.map((item) => (
-        <option key={item.value} value={item.value}>
-            {item.title}
+    const list = values.map((item: any) => (
+        <option key={item} value={item}>
+            {item}
         </option>
     ));
 

@@ -1,6 +1,7 @@
-import { Maths, Types } from '@tosios/common';
+import { Maths, Types, Constants } from '@tosios/common';
 import { Circle } from './Circle';
 import { type } from '@colyseus/schema';
+import { constants } from 'buffer';
 
 export class Player extends Circle {
     @type('string')
@@ -11,6 +12,12 @@ export class Player extends Circle {
 
     @type('string')
     public emoji: string;
+
+    @type('string')
+    public ability: string;
+
+    @type('boolean')
+    public abilityIsActive: boolean;
 
     @type('number')
     public lives: number;
@@ -35,6 +42,7 @@ export class Player extends Circle {
 
     // This property is needed to limit shooting rate
     public lastShootAt: number;
+    public lastMoveAt: number;
 
     // Init
     constructor(
@@ -46,7 +54,8 @@ export class Player extends Circle {
         maxLives: number,
         name: string,
         emoji: string,
-        team?: Types.Teams,
+        ability: string,
+        team?: Types.Teams
     ) {
         super(x, y, radius);
         this.playerId = playerId;
@@ -54,11 +63,14 @@ export class Player extends Circle {
         this.maxLives = maxLives;
         this.name = validateName(name);
         this.emoji = emoji;
+        this.ability = ability;
         this.team = team;
         this.color = team ? getTeamColor(team) : '#FFFFFF';
         this.kills = 0;
         this.rotation = 0;
         this.lastShootAt = undefined;
+        this.lastMoveAt = undefined;
+        this.abilityIsActive = false;
     }
 
     // Methods
@@ -90,6 +102,12 @@ export class Player extends Circle {
         }
 
         if (!!team && team === this.team) {
+            return false;
+        }
+
+        // Bullets can't hurt invisible players
+        const delta = Date.now() - this.lastShootAt
+        if (this.ability === 'invisibility' && delta < Constants.INVIS_DURATION) {
             return false;
         }
 

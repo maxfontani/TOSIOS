@@ -193,8 +193,8 @@ export class GameState extends Schema {
     //
     // Players: single
     //
-    playerAdd(id: string, name: string, emoji: string) {
-        const spawner = this.getSpawnerRandomly();
+    playerAdd(id: string, name: string, emoji: string, ability: string) {
+        const spawner = this.spawners[this.players.size];
         const player = new Player(
             id,
             spawner.x + Constants.PLAYER_SIZE / 2,
@@ -203,7 +203,8 @@ export class GameState extends Schema {
             0,
             Constants.PLAYER_MAX_LIVES,
             name || id,
-            emoji
+            emoji,
+            ability
         );
 
         // Add the user to the "red" team by default
@@ -234,6 +235,13 @@ export class GameState extends Schema {
             return;
         }
 
+        // Check if player can move
+        const delta = ts - player.lastMoveAt;
+        if (player.lastMoveAt && delta < Constants.MOVE_RATE) {
+            return;
+        }
+        player.lastMoveAt = ts;
+
         player.move(dir.x, dir.y, Constants.PLAYER_SPEED);
 
         // Collisions: Map
@@ -244,7 +252,7 @@ export class GameState extends Schema {
         const correctedPosition = this.walls.correctWithCircle(player.body);
         player.setPosition(correctedPosition.x, correctedPosition.y);
 
-        // Acknoledge last treated action
+        // Acknowledge last treated action
         player.ack = ts;
 
         // Collisions: Props
@@ -285,38 +293,50 @@ export class GameState extends Schema {
 
     private playerShoot(id: string, ts: number, angle: number) {
         const player = this.players.get(id);
-        if (!player || !player.isAlive || this.game.state !== 'game') {
+
+        console.log('SERV SHOOT ABIL ', player.ability);
+
+        // !player.isAlive || 
+        if (!player || this.game.state !== 'game') {
             return;
         }
 
-        // Check if player can shoot
-        const delta = ts - player.lastShootAt;
-        if (player.lastShootAt && delta < Constants.BULLET_RATE) {
-            return;
-        }
-        player.lastShootAt = ts;
+        switch (player.ability) {
+            case 'shoot':
+                // Check if player can shoot
+                const delta = ts - player.lastShootAt;
+                if (player.lastShootAt && delta < Constants.BULLET_RATE) {
+                    return;
+                }
+                player.lastShootAt = ts;
 
-        // Make the bullet start at the staff
-        const bulletX = player.x + Math.cos(angle) * Constants.PLAYER_WEAPON_SIZE;
-        const bulletY = player.y + Math.sin(angle) * Constants.PLAYER_WEAPON_SIZE;
+                // Make the bullet start at the staff
+                const bulletX = player.x + Math.cos(angle) * Constants.PLAYER_WEAPON_SIZE;
+                const bulletY = player.y + Math.sin(angle) * Constants.PLAYER_WEAPON_SIZE;
 
-        // Recycle bullets if some are unused to prevent instantiating too many
-        const index = this.bullets.findIndex((bullet) => !bullet.active);
-        if (index === -1) {
-            this.bullets.push(
-                new Bullet(id, player.team, bulletX, bulletY, Constants.BULLET_SIZE, angle, player.color, Date.now()),
-            );
-        } else {
-            this.bullets[index].reset(
-                id,
-                player.team,
-                bulletX,
-                bulletY,
-                Constants.BULLET_SIZE,
-                angle,
-                player.color,
-                Date.now(),
-            );
+                this.bullets.push(
+                    new Bullet(id, player.team, bulletX, bulletY, Constants.BULLET_SIZE, angle, player.color, Date.now()),
+                );
+
+                break;
+            case 'invisibility':
+                // Check if player can use the ability
+                console.log('GAME STATE INVIZ ');
+                
+                const deltaInvis = ts - player.lastShootAt;
+                if (player.lastShootAt && deltaInvis < Constants.INVIS_RATE) {
+                    return;
+                }
+                player.lastShootAt = ts;
+                player.abilityIsActive = true;
+                setTimeout(() => {
+                    player.abilityIsActive = false;
+                }, Constants.INVIS_DURATION)
+                break;
+            case 'charge':
+                break;
+            default:
+                return;
         }
     }
 

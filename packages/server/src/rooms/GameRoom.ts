@@ -21,18 +21,18 @@ export class GameRoom extends Room<GameState> {
         this.setMetadata({
             playerName,
             roomName,
-            roomMap: options.roomMap,
+            roomMapName: options.roomMapName,
             roomMaxPlayers: this.maxClients,
             mode: options.mode,
         });
 
         // Init State
-        this.setState(new GameState(roomName, options.roomMap, this.maxClients, options.mode, this.handleMessage));
+        this.setState(new GameState(roomName, options.roomMapName, this.maxClients, options.mode, this.handleMessage));
 
         this.setSimulationInterval(() => this.handleTick());
 
         console.log(
-            `${new Date().toISOString()} [Create] player=${playerName} room=${roomName} map=${options.roomMap} max=${
+            `${new Date().toISOString()} [Create] player=${playerName} room=${roomName} map=${options.roomMapName} max=${
                 this.maxClients
             } mode=${options.mode}`,
         );
@@ -58,9 +58,9 @@ export class GameRoom extends Room<GameState> {
     }
 
     onJoin(client: Client, options: Types.IPlayerOptions) {
-        this.state.playerAdd(client.sessionId, options.playerName, options.playerEmoji);
+        this.state.playerAdd(client.sessionId, options.playerName, options.playerEmoji, options.playerAbility);
 
-        console.log(`${new Date().toISOString()} [Join] id=${client.sessionId} player=${options.playerName} emoji=${options.playerEmoji}`);
+        console.log(`${new Date().toISOString()} [Join] id=${client.sessionId} player=${options.playerName} emoji=${options.playerEmoji} abil=${options.playerAbility}`);
     }
 
     onLeave(client: Client) {

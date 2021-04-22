@@ -20,32 +20,27 @@ import { Helmet } from 'react-helmet';
 import { RoomAvailable } from 'colyseus.js/lib/Room';
 import qs from 'querystringify';
 import { useAnalytics } from '../hooks';
+import { IMapItem, PlayerAbility } from '@tosios/common/src/types';
 
-const MapsList: IListItem[] = Constants.MAPS_NAMES.map((value) => ({
-    value,
-    title: value,
+const MapsList: Types.IMapItem[] = Constants.MAPS.map((map) => ({
+    name: map.name,
+    playersScale: map.playersScale,
+    maxPlayers: map.maxPlayers
 }));
 
-const PlayersCountList: IListItem[] = Constants.ROOM_PLAYERS_SCALES.map((value) => ({
-    value,
-    title: `${value} players`,
-}));
-
-// const GameModesList: IListItem[] = Constants.GAME_MODES.map((value) => ({
-//     value,
-//     title: value,
-// }));
+const MapsNamesList: string[] = MapsList.map((map: IMapItem): string => {return map.name});
 
 interface IProps extends RouteComponentProps {}
 
 interface IState {
     playerName: string;
     playerEmoji: string;
+    playerAbility: PlayerAbility;
     hasNameChanged: boolean;
     hasEmojiChanged: boolean; 
     isNewRoom: boolean;
     roomName: string;
-    roomMap: any;
+    roomMap: Types.IMapItem;
     roomMaxPlayers: any;
     mode: any;
     rooms: Array<RoomAvailable<any>>;
@@ -59,14 +54,15 @@ export default class Home extends Component<IProps, IState> {
         super(props);
 
         this.state = {
-            playerName: localStorage.getItem('playerName') || '',
+            playerName: '',
             playerEmoji: '',
+            playerAbility: 'shoot',
             hasNameChanged: false,
             hasEmojiChanged: false,
             isNewRoom: false,
             roomName: localStorage.getItem('roomName') || '',
-            roomMap: MapsList[0].value,
-            roomMaxPlayers: PlayersCountList[0].value,
+            roomMap: MapsList[0],
+            roomMaxPlayers: MapsList[0].maxPlayers,
             mode: 'deathmatch',
             rooms: [],
             timer: null,
@@ -102,14 +98,13 @@ export default class Home extends Component<IProps, IState> {
 
     // HANDLERS
     handlePlayerNameChange = (event: any) => {
-        console.log(event.target.value);
         this.setState({
             playerName: event.target.value,
             hasNameChanged: true,
         });
     };
     
-    handlePlayerEmojiChange = (target: any) => {
+    handlePlayerEmojiChange = (target: any, ability: PlayerAbility) => {
         if (this.state.playerEmoji === target.innerText) {
             this.setState({
                 playerEmoji: '',
@@ -118,13 +113,14 @@ export default class Home extends Component<IProps, IState> {
         } else {
             this.setState({
                 playerEmoji: target.innerText,
+                playerAbility: ability,
                 hasEmojiChanged: true,
             });
         }
     };
 
     handleNameSave = () => {
-        const { playerName, playerEmoji } = this.state;
+        const { playerName, playerEmoji, playerAbility } = this.state;
         const analytics = useAnalytics();
 
         localStorage.setItem('playerName', playerName);
@@ -136,6 +132,12 @@ export default class Home extends Component<IProps, IState> {
         this.setState({
             hasEmojiChanged: false,
         });
+
+        localStorage.setItem('playerAbility', playerAbility);
+        this.setState({
+            hasEmojiChanged: false,
+        });
+
 
         analytics.track({ category: 'User', action: 'Rename' });
     };
@@ -150,15 +152,14 @@ export default class Home extends Component<IProps, IState> {
     };
 
     handleRoomClick = (roomId: string) => {
-        const { playerName, playerEmoji } = this.state;
+        const { playerName, playerEmoji, playerAbility } = this.state;
         const analytics = useAnalytics();
 
-        analytics.track({
-            category: 'Room',
-            action: 'Join',
-        });
-
-        if (playerName && playerEmoji) {
+        if (playerName && playerEmoji && playerAbility) {
+            analytics.track({
+                category: 'Room',
+                action: 'Join',
+            });
             this.handleNameSave()
             navigate(`/${roomId}`);
         } else {
@@ -167,19 +168,21 @@ export default class Home extends Component<IProps, IState> {
     };
 
     handleCreateRoomClick = () => {
-        const { playerName, playerEmoji, roomName, roomMap, roomMaxPlayers, mode } = this.state;
+        const { playerName, playerEmoji, playerAbility, roomName, roomMap, roomMaxPlayers, mode } = this.state;
         const analytics = useAnalytics();
+        const roomMapName = roomMap.name;
 
         const options: Types.IRoomOptions = {
             playerName,
             playerEmoji,
+            playerAbility,
             roomName,
-            roomMap,
+            roomMapName,
             roomMaxPlayers,
             mode
         };
 
-        if (playerName && playerEmoji) {
+        if (playerName && playerEmoji && playerAbility) {
             analytics.track({ category: 'Game', action: 'Create' });
             navigate(`/new${qs.stringify(options, true)}`);
         } else {
@@ -204,6 +207,7 @@ export default class Home extends Component<IProps, IState> {
             rooms,
         });
     };
+
 
     // RENDER
     render() {
@@ -289,9 +293,9 @@ export default class Home extends Component<IProps, IState> {
                         justifyContent: 'space-between'
                     }}
                 >
-                    <Icon color='blue' handlePlayerEmojiChange={this.handlePlayerEmojiChange} playerEmoji={this.state.playerEmoji}>&#129497;</Icon>
-                    <Icon color='red' handlePlayerEmojiChange={this.handlePlayerEmojiChange} playerEmoji={this.state.playerEmoji}>&#129499;</Icon>
-                    <Icon color='green'handlePlayerEmojiChange={this.handlePlayerEmojiChange} playerEmoji={this.state.playerEmoji}>&#129423;</Icon>
+                    <Icon color='blue' handlePlayerEmojiChange={this.handlePlayerEmojiChange} playerEmoji={this.state.playerEmoji} playerAbility='shoot'>&#129497;</Icon>
+                    <Icon color='red' handlePlayerEmojiChange={this.handlePlayerEmojiChange} playerEmoji={this.state.playerEmoji} playerAbility='invisibility'>&#129499;</Icon>
+                    <Icon color='green'handlePlayerEmojiChange={this.handlePlayerEmojiChange} playerEmoji={this.state.playerEmoji} playerAbility='charge'>&#129423;</Icon>
                 </View>
                 {/* {this.state.hasNameChanged && this.state.playerName && (
                     <>
@@ -361,10 +365,11 @@ export default class Home extends Component<IProps, IState> {
                         <Text>Map:</Text>
                         <Space size="xxs" />
                         <Select
-                            value={roomMap}
-                            values={MapsList}
+                            value={roomMap.name}
+                            values={MapsNamesList}
                             onChange={(event: any) => {
-                                this.setState({ roomMap: event.target.value });
+                                const newRoomMap = MapsList.filter(map => {return map.name === event.target.value})[0]
+                                this.setState({ roomMap: newRoomMap });
                                 analytics.track({
                                     category: 'Game',
                                     action: 'Map',
@@ -372,7 +377,6 @@ export default class Home extends Component<IProps, IState> {
                                 });
                             }}
                             style={{backgroundColor: '#efefef'}}
-
                         />
                         <Space size="s" />
 
@@ -381,7 +385,7 @@ export default class Home extends Component<IProps, IState> {
                         <Space size="xxs" />
                         <Select
                             value={roomMaxPlayers}
-                            values={PlayersCountList}
+                            values={roomMap.playersScale}
                             onChange={(event: any) => {
                                 this.setState({ roomMaxPlayers: event.target.value });
                                 analytics.track({
@@ -445,15 +449,15 @@ export default class Home extends Component<IProps, IState> {
         }
 
         return rooms.map(({ roomId, metadata, clients, maxClients }, index) => {
-            const map = MapsList.find((item) => item.value === metadata.roomMap);
-            const mapName = map ? map.title : metadata.roomMap;
+            const map = MapsList.find((item) => item.name === metadata.roomMapName);
+            const mapName = map ? map.name : metadata.roomMapName;
 
             return (
                 <Fragment key={roomId}>
                     <Room
                         id={roomId}
                         roomName={metadata.roomName}
-                        roomMap={mapName}
+                        roomMapName={mapName}
                         clients={clients}
                         maxClients={maxClients}
                         mode={metadata.mode}

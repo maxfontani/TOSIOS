@@ -81,7 +81,8 @@ export default class Match extends Component<IProps, IState> {
             // The only thing to pass when joining an existing room is a player's name
             options = {
                 playerName: localStorage.getItem('playerName'),
-                playerEmoji: localStorage.getItem('playerEmoji')
+                playerEmoji: localStorage.getItem('playerEmoji'),
+                playerAbility: localStorage.getItem('playerAbility')
             };
         }
 
@@ -128,11 +129,11 @@ export default class Match extends Component<IProps, IState> {
         // Listen for Messages
         this.room.onMessage('*', this.handleMessage);
 
-        // Start game
-        this.game.start(this.canvasRef.current);
-
         // Listen for inputs
         window.addEventListener('resize', this.handleWindowResize);
+
+        // Start game
+        this.game.start(this.canvasRef.current);
 
         // Start players refresh listeners
         this.timer = setInterval(this.updateRoom, Constants.PLAYERS_REFRESH);
@@ -286,6 +287,8 @@ export default class Match extends Component<IProps, IState> {
                 ...stats,
             },
         }));
+
+        this.game.setScreenSize(window.innerWidth, window.innerHeight);
     };
 
     // RENDER

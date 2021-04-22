@@ -11,7 +11,7 @@ const LIVES_OFFSET = 6;
 const HURT_COLOR = 0xff0000;
 const HEAL_COLOR = 0x00ff00;
 const BULLET_DELAY_FACTOR = 1.1; // Add 10% to delay as server may lag behind sometimes (rarely)
-const SMOKE_DELAY = 500;
+const SMOKE_DELAY = 3000;
 const DEAD_ALPHA = 0.2;
 const ZINDEXES = {
     SHADOW: 0,
@@ -21,14 +21,16 @@ const ZINDEXES = {
     INFOS: 4,
 };
 
-export type PlayerDirection = 'top' | 'right' | 'left' | 'bottom';
-
 export class Player extends BaseEntity {
     private _playerId: string = '';
 
     private _name: string = '';
 
     private _emoji: string = '';
+
+    private _ability: string = '';
+
+    private _abilityIsActive: boolean = false;
 
     private _lives: number = 0;
 
@@ -45,9 +47,11 @@ export class Player extends BaseEntity {
     // Computed
     private _isGhost: boolean = false;
 
-    private _direction: PlayerDirection = 'right';
+    private _direction: Types.PlayerDirection = 'right';
 
     private _lastShootAt: number = 0;
+
+    private _lastMoveAt: number = 0;
 
     private _toX: number = 0;
 
@@ -79,16 +83,17 @@ export class Player extends BaseEntity {
             zIndex: ZINDEXES.PLAYER,
         });
 
+        // Will be used for the dead texture
         this.sprite.visible = false;
 
         // Arrow
-        
         this._arrowSprite = new Sprite(WeaponTextures.arrow);
         this._arrowSprite.scale.x = 0.3;
         this._arrowSprite.scale.y = 0.3;
         this._arrowSprite.anchor.set(0, 0.5);
         this._arrowSprite.position.set(player.radius, player.radius);
-        this._arrowSprite.zIndex = ZINDEXES.INFOS;
+        this._arrowSprite.zIndex = ZINDEXES.PLAYER;
+        this._arrowSprite.alpha = 0;
         this.container.addChild(this._arrowSprite);
 
         // Name
@@ -96,11 +101,10 @@ export class Player extends BaseEntity {
         this._nameTextSprite.position.set(player.radius, -NAME_OFFSET);
         this._nameTextSprite.zIndex = ZINDEXES.INFOS;
         this.container.addChild(this._nameTextSprite);
-
         // Emoji
         this._emojiTextSprite = new TextSprite(player.emoji, 24, 0, 0);
         this._emojiTextSprite.position.set(2, 4);
-        this._emojiTextSprite.zIndex = ZINDEXES.INFOS;
+        this._emojiTextSprite.zIndex = ZINDEXES.PLAYER;
         this.container.addChild(this._emojiTextSprite);
 
         // Lives
@@ -118,7 +122,7 @@ export class Player extends BaseEntity {
         this._shadow.zIndex = ZINDEXES.SHADOW;
         this._shadow.pivot.set(0.5);
         this._shadow.beginFill(0x000000, 0.3);
-        this._shadow.drawEllipse(player.radius, player.radius * 2, player.radius * 0.7, player.radius * 0.3);
+        this._shadow.drawEllipse(player.radius * 0.9, player.radius * 1.85, player.radius * 0.5, player.radius * 0.25);
         this._shadow.endFill();
         this.container.addChild(this._shadow);
 
@@ -135,6 +139,7 @@ export class Player extends BaseEntity {
         this.rotation = player.rotation;
         this.name = player.name;
         this.emoji = player.emoji;
+        this.ability = player.ability;
         this.color = player.color;
         this.lives = player.lives;
         this.maxLives = player.maxLives;
@@ -156,21 +161,34 @@ export class Player extends BaseEntity {
 
         this.x += speedX;
         this.y += speedY;
+
+        let dir: Types.PlayerDirection
+
+        if (dirX) {
+            dirX > 0 ? dir = 'right' : dir = 'left'
+        } else {
+            dirY > 0 ? dir = 'down' : dir = 'up'
+        }
+
+        this.spawnSmoke(dir)
     }
 
     hurt() {
-        Effects.flash(this.sprite, HURT_COLOR, utils.string2hex(this.color));
+        Effects.flash(this._emojiTextSprite, HURT_COLOR, utils.string2hex(this.color));
     }
 
     heal() {
-        Effects.flash(this.sprite, HEAL_COLOR, utils.string2hex(this.color));
+        Effects.flash(this._emojiTextSprite, HEAL_COLOR, utils.string2hex(this.color));
+    }
+
+    hide(duration?: number) {
+        Effects.hide(this._emojiTextSprite, duration = Constants.INVIS_DURATION);
     }
 
     updateTextures() {
         const isAlive = this.lives > 0;
 
         // Player
-
         // this.sprite.alpha = isAlive ? 1 : DEAD_ALPHA;
         // this.sprite.textures = isAlive ? PlayerTextures.playerIdleTextures : PlayerTextures.playerDeadTextures;
         // this.sprite.anchor.set(0.5);
@@ -178,31 +196,71 @@ export class Player extends BaseEntity {
         // this.sprite.height = this.body.height;
         // this.sprite.play();
 
-        // Weapon
-        // this._arrowSprite.visible = this.isGhost ? isAlive && Constants.DEBUG : isAlive;
+        // Sprites' alpha levels
+        let currentAlpha = 1;
+        this.sprite.textures = PlayerTextures.playerDeadTextures;
+        this.sprite.anchor.set(0.5);
+        this.sprite.width = this.body.width;
+        this.sprite.height = this.body.height;
 
-        // Name
-        this._nameTextSprite.alpha = isAlive ? 1 : DEAD_ALPHA;
-        this._emojiTextSprite.alpha = isAlive ? 1 : DEAD_ALPHA;
+        if (!isAlive) {
+            this.sprite.textures = PlayerTextures.playerDeadTextures;
+            this.sprite.visible = true;
+            this.sprite.play();
+            currentAlpha = DEAD_ALPHA;
+        } else if (this.abilityIsActive && this.ability === 'invisibility') {
+            currentAlpha = 0;
+        } else {
+            this.sprite.stop()
+            this.sprite.visible = false;
+        }
 
-        // Lives
-        this._livesSprite.alpha = isAlive ? 1 : DEAD_ALPHA;
-
-        // Shadow
-        this._shadow.alpha = isAlive ? 1 : DEAD_ALPHA;
+        this.emojiAlpha = currentAlpha;
     }
 
-    canShoot(): boolean {
+    toggleAbilityIsActive() {
+        this.abilityIsActive = true;
+        setTimeout(() => {
+            this.abilityIsActive = false;
+        }, Constants.INVIS_DURATION);
+    }
+
+    canShoot(): any {
         if (!this.isAlive) {
             return false;
         }
-
         const now: number = Date.now();
-        if (now - this.lastShootAt < Constants.BULLET_RATE * BULLET_DELAY_FACTOR) {
+        switch(this._ability) {
+            case 'shoot':
+                if (now - this.lastShootAt < Constants.BULLET_RATE * BULLET_DELAY_FACTOR) {
+                    return false;
+                }
+                this.lastShootAt = now; 
+                return 'shoot';
+            case 'invisibility':
+                if (now - this.lastShootAt < Constants.INVIS_RATE * BULLET_DELAY_FACTOR) {
+                    return false;
+                }
+                this.lastShootAt = now; 
+                return 'invisibility';
+            // case 'charge':
+            //     if (now - this.lastShootAt < Constants.CHARGE_RATE * BULLET_DELAY_FACTOR) {
+            //         return false;
+            //     }
+            //     this.lastShootAt = now; 
+            //     return 'charge';  
+            default:
+                return false;
+            }
+    }
+
+    canMove(): boolean {
+        const now: number = Date.now();
+        if (now - this.lastMoveAt < Constants.MOVE_RATE) {
             return false;
         }
 
-        this.lastShootAt = now;
+        this.lastMoveAt = now;
         return true;
     }
 
@@ -223,10 +281,16 @@ export class Player extends BaseEntity {
             return false;
         }
 
+        // Bullets can't hurt invisible players
+        const delta = Date.now() - this.lastShootAt
+        if (this.ability === 'invisibility' && delta < Constants.INVIS_DURATION) {
+            return false;
+        }
+
         return true;
     }
 
-    spawnSmoke() {
+    spawnSmoke(dir: Types.PlayerDirection) {
         if (!this._particlesContainer) {
             return;
         }
@@ -240,12 +304,43 @@ export class Player extends BaseEntity {
             return;
         }
 
+        let smokePosition = {
+            x: this.body.x,
+            y: this.body.y,
+        }
+
+        switch (dir) {
+            case 'up':
+                smokePosition.x = this.body.x;
+                smokePosition.y = this.body.y + this.body.radius / 2;
+                SmokeConfig.startRotation.min = 90; 
+                SmokeConfig.startRotation.max = 90;
+                break;
+            case 'down':
+                smokePosition.x = this.body.x;
+                smokePosition.y = this.body.y - this.body.radius / 2;
+                SmokeConfig.startRotation.min = -90; 
+                SmokeConfig.startRotation.max = -90;
+                break;
+            case 'right':
+                smokePosition.x = this.body.x - this.body.radius / 2;
+                smokePosition.y = this.body.y;
+                SmokeConfig.startRotation.min = 180; 
+                SmokeConfig.startRotation.max = 180;
+                break;
+            case 'left':
+                smokePosition.x = this.body.x + this.body.radius / 2;
+                smokePosition.y = this.body.y;
+                SmokeConfig.startRotation.min = 0; 
+                SmokeConfig.startRotation.max = 0;
+                break;   
+            default:
+                break;
+        }
+
         new Emitter(this._particlesContainer, [SmokeTexture], {
             ...SmokeConfig,
-            pos: {
-                x: this.body.x,
-                y: this.body.y + this.body.radius / 2,
-            },
+            pos: smokePosition,
         }).playOnceAndDestroy();
 
         this._lastSmokeAt = Date.now();
@@ -255,13 +350,11 @@ export class Player extends BaseEntity {
     set x(x: number) {
         this.container.x = x;
         this.body.x = x;
-        this.spawnSmoke();
     }
 
     set y(y: number) {
         this.container.y = y;
         this.body.y = y;
-        this.spawnSmoke();
     }
 
     set toX(toX: number) {
@@ -284,6 +377,26 @@ export class Player extends BaseEntity {
     set emoji(emoji: string) {
         this._emoji = emoji;
         this._emojiTextSprite.text = emoji;
+    }
+
+    set emojiAlpha(alpha: number) {
+        this._nameTextSprite.alpha = alpha;
+        this._emojiTextSprite.alpha = alpha;
+        this._shadow.alpha = alpha;
+        this._livesSprite.alpha = alpha;
+    }
+
+    set arrowAlpha(alpha: number) {
+        this._arrowSprite.alpha = alpha;
+    }
+
+    set ability(ability: string) {
+        this._ability = ability;
+    }
+
+    set abilityIsActive(value: boolean) {
+        this._abilityIsActive = value;
+        this.updateTextures();
     }
 
     set lives(lives: number) {
@@ -337,29 +450,34 @@ export class Player extends BaseEntity {
         this._direction = getDirection(rotation);
 
         switch (this._direction) {
-            case 'top':
+            case 'up':
                 this._arrowSprite.angle = 0;
                 this._arrowSprite.position.set(8,1)
+                this._rotation = - (Math.PI / 2)
                 break;      
             case 'left':
                 this._arrowSprite.angle = -90;
                 this._arrowSprite.position.set(0,24)
+                this._rotation = Math.PI
                 break;
             case 'right':
                 this._arrowSprite.angle = 90;
                 this._arrowSprite.position.set(32,10)
+                this._rotation = 0
                 break;
-            case 'bottom':
+            case 'down':
                 this._arrowSprite.angle = 180;
                 this._arrowSprite.position.set(22,32)
+                this._rotation = Math.PI / 2
                 break;
             default:
                 break;
         }
 
-        // Make rotation smooth
+        // For smooth rotation remove the this._rotation assignment in the switch above and uncomment the following:
         // this._rotation = rotation;
         // this._arrowSprite.rotation = rotation;
+
         this.container.sortChildren();
     }
 
@@ -369,6 +487,10 @@ export class Player extends BaseEntity {
 
     set lastShootAt(lastShootAt: number) {
         this._lastShootAt = lastShootAt;
+    }
+
+    set lastMoveAt(lastMoveAt: number) {
+        this._lastMoveAt = lastMoveAt;
     }
 
     // Getters
@@ -394,6 +516,14 @@ export class Player extends BaseEntity {
 
     get name() {
         return this._name;
+    }
+
+    get ability() {
+        return this._ability;
+    }
+
+    get abilityIsActive() {
+        return this._abilityIsActive;
     }
 
     get lives() {
@@ -424,6 +554,10 @@ export class Player extends BaseEntity {
         return this._lastShootAt;
     }
 
+    get lastMoveAt() {
+        return this._lastMoveAt;
+    }
+
     get isAlive() {
         return this._lives > 0;
     }
@@ -440,7 +574,7 @@ const getTexture = (lives: number): Texture[] => {
 /**
  * Get a direction given a rotation.
  */
-function getDirection(rotation: number): PlayerDirection {
+function getDirection(rotation: number): Types.PlayerDirection {
 
     // Right = 0
     const bottom_right = Math.PI / 4;
@@ -454,8 +588,8 @@ function getDirection(rotation: number): PlayerDirection {
     }
 
     if (rotation < 0) {
-        return 'top';
+        return 'up';
     }
 
-    return 'bottom';
+    return 'down';
 }

@@ -23,13 +23,13 @@ const ROOM_HOVERED = {
 export function Room(props: {
     id: string;
     roomName: string;
-    roomMap: string;
+    roomMapName: string;
     clients: number;
     maxClients: number;
     mode: GameMode;
     onClick: (id: string) => void;
 }): React.ReactElement {
-    const { id, roomName, roomMap, clients, maxClients, mode, onClick } = props;
+    const { id, roomName, roomMapName, clients, maxClients, mode, onClick } = props;
     const [hovered, setHovered] = React.useState(false);
 
     return (
@@ -48,7 +48,7 @@ export function Room(props: {
                 <Space size="xxs" />
                 <RoomFieldItem title="Players" content={`"${clients}/${maxClients}"`} />
                 <Space size="xxs" />
-                <RoomFieldItem title="Map" content={`"${roomMap}"`} />
+                <RoomFieldItem title="Map" content={`"${roomMapName}"`} />
                 <Space size="xxs" />
                 <RoomFieldItem title="Mode" content={`"${mode}"`} />
             </View>

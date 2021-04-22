@@ -84,7 +84,7 @@ export function Menu(props: { onClose?: () => void; onLeave?: () => void; style?
                 <Space size="s" />
 
                 {/* Keys: Shoot */}
-                <Text style={styles.sectionKey}>Shoot:</Text>
+                <Text style={styles.sectionKey}>Use ability:</Text>
                 <Space size="xxs" />
                 <View flex>
                     <KeyboardKey value="Left click" />

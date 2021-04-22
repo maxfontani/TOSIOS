@@ -8,15 +8,29 @@ export const PLAYERS_REFRESH = 1000;
 export const DEBUG = false;
 
 // Game
-export const MAPS_NAMES = ['small', 'gigantic', 'neon'];
+
+// The playersScale must be in an accending order
+export const MAPS = [
+    {
+        name: 'neon',
+        playersScale: [2, 3, 4],
+        maxPlayers: 4
+    },
+    {        
+        name: 'xxl',
+        playersScale: [4, 6, 12],
+        maxPlayers: 12
+    }
+];
 export const ROOM_PLAYERS_MIN = 2;
 export const ROOM_PLAYERS_MAX = 16;
-export const ROOM_PLAYERS_SCALES = [2, 4, 8, 16];
+// export const ROOM_PLAYERS_SCALES_4 = [2, 3, 4];
+// export const ROOM_PLAYERS_SCALES_16 = [4, 8, 12, 16];
 export const ROOM_NAME_MAX = 16;
 export const PLAYER_NAME_MAX = 16;
 export const LOG_LINES_MAX = 5;
-export const LOBBY_DURATION = 1000 * 3; // 3 seconds
-export const GAME_DURATION = 1000 * 90; // 90 seconds
+export const LOBBY_DURATION = 1000 * 1; // 1 second
+export const GAME_DURATION = 1000 * 90000; // 90 seconds
 
 // Background
 export const BACKGROUND_COLOR =  '#270221';
@@ -26,7 +40,7 @@ export const TILE_SIZE = 32;
 
 // Player (circle)
 export const PLAYER_SIZE = 32;
-export const PLAYER_SPEED = 3;
+export const PLAYER_SPEED = 32;
 export const PLAYER_MAX_LIVES = 3;
 export const PLAYER_WEAPON_SIZE = 12; // The bigger, the further away a bullet will be shot from.
 export const PLAYER_HEARING_DISTANCE = 256;
@@ -51,4 +65,8 @@ export const FLASK_SIZE = 24;
 // Bullet (circle)
 export const BULLET_SIZE = 8;
 export const BULLET_SPEED = 8;
-export const BULLET_RATE = 400; // The bigger, the slower.
+export const BULLET_RATE = 2000; // The bigger, the slower. Default 2000.
+export const INVIS_RATE = 7000; // Invisibility ability rate. The bigger, the rarer. Default 3000.
+export const INVIS_DURATION = 6000; // Invisibility duration. The bigger, the longer. 
+export const CHARGE_RATE = 3000; // Charging ability rate. The bigger, the rarer. Default 3000.
+export const MOVE_RATE = 500; // The bigger, the slower. 1000 = 1 move/second.

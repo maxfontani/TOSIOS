@@ -147,6 +147,8 @@ export class TreeCollider extends RBush<{
             leafBody.height = wall.maxY - wall.minY;
 
             const side = circleToRectangleSide(body, leafBody);
+
+            
             switch (side) {
                 case 'left':
                     updatedBody.right = leafBody.left;
@@ -164,8 +166,57 @@ export class TreeCollider extends RBush<{
                     break;
             }
         }
-
         return updatedBody;
+    }
+
+    noWallsAhead(xDir: number, yDir: number, body: CircleBody): boolean {
+        const radius = body.radius;
+
+        const bodyMinX = body.x - radius;
+        const bodyMinY = body.y - radius;
+        const bodyMaxX = body.x + radius;
+        const bodyMaxY = body.y + radius;
+
+        let direction: string;
+
+        if (xDir) {
+            xDir > 0 ? direction = 'right' : direction = 'left'
+        } else {
+            yDir > 0 ? direction = 'down' : direction = 'up'
+        }
+
+        if (!direction) return false
+
+        const leaves = this.searchWithCircle(body);
+
+        if (!leaves || !leaves.length) {
+            return true;
+        }
+
+        for (const wall of leaves) {
+            if (!wall.collider || !COLLISION_TYPES.includes(wall.collider)) {
+                continue;
+            }
+
+            switch (direction) {
+                case 'left':
+                    if (wall.maxX === bodyMinX && wall.minY === bodyMinY) return false;
+                    break;
+                case 'up':
+                    if (wall.maxY === bodyMinY && wall.minX === bodyMinX) return false;
+                    break;
+                case 'right':
+                    if (wall.minX === bodyMaxX && wall.minY === bodyMinY) return false;
+                    break;
+                case 'down':
+                    if (wall.minY === bodyMaxY && wall.minX === bodyMinX) return false;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return true;
     }
 
     // Getters

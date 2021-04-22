@@ -1,7 +1,8 @@
 import React, { CSSProperties, ReactNode, useEffect } from 'react';
+import { PlayerAbility, IconColor } from '@tosios/common/src/types';
 
-export function Icon(props: { style?: CSSProperties; children: ReactNode; color?: IconColor; handlePlayerEmojiChange: any; playerEmoji: string; }): React.ReactElement {
-    const { style, children, color, handlePlayerEmojiChange, playerEmoji } = props;
+export function Icon(props: { style?: CSSProperties; children: ReactNode; color?: IconColor; handlePlayerEmojiChange: any; playerEmoji: string; playerAbility: PlayerAbility }): React.ReactElement {
+    const { style, children, color, handlePlayerEmojiChange, playerEmoji, playerAbility } = props;
     const [hovered, setHovered] = React.useState(false);
     const [active, setActive] = React.useState(false);
 
@@ -30,16 +31,13 @@ export function Icon(props: { style?: CSSProperties; children: ReactNode; color?
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             onClick={e => {
-
-                handlePlayerEmojiChange(e.target)
+                handlePlayerEmojiChange(e.target, playerAbility)
             }}
         >
             {children}
         </div>
     );
 }
-
-type IconColor = 'red' | 'blue' | 'green' | 'yellow';
 
 const GREEN: string = 'linear-gradient(180deg, #56B870 0%,#a5c956 100%)'
 const RED: string = 'linear-gradient(0deg, #c44a50 0%,#cf0404 100%)'

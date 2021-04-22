@@ -11,6 +11,8 @@ export interface PlayerJSON {
     playerId: string;
     name: string;
     emoji: string;
+    ability: string;
+    abilityIsActive: boolean;
     lives: number;
     maxLives: number;
     team?: Teams;

@@ -7,7 +7,7 @@ import { ExplosionSound } from '../assets/sounds';
 import { WeaponTextures } from '../assets/images';
 
 const ZINDEXES = {
-    BULLET: 0,
+    BULLET: 5,
 };
 
 export class Bullet extends BaseEntity {
