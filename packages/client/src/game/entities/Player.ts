@@ -187,14 +187,7 @@ export class Player extends BaseEntity {
 
     updateTextures() {
         const isAlive = this.lives > 0;
-
-        // Player
-        // this.sprite.alpha = isAlive ? 1 : DEAD_ALPHA;
-        // this.sprite.textures = isAlive ? PlayerTextures.playerIdleTextures : PlayerTextures.playerDeadTextures;
-        // this.sprite.anchor.set(0.5);
-        // this.sprite.width = this.body.width;
-        // this.sprite.height = this.body.height;
-        // this.sprite.play();
+        const isInvisible = this.abilityIsActive && this.ability === 'invisibility'
 
         // Sprites' alpha levels
         let currentAlpha = 1;
@@ -204,18 +197,19 @@ export class Player extends BaseEntity {
         this.sprite.height = this.body.height;
 
         if (!isAlive) {
-            this.sprite.textures = PlayerTextures.playerDeadTextures;
             this.sprite.visible = true;
             this.sprite.play();
             currentAlpha = DEAD_ALPHA;
-        } else if (this.abilityIsActive && this.ability === 'invisibility') {
-            currentAlpha = 0;
         } else {
             this.sprite.stop()
             this.sprite.visible = false;
+            currentAlpha = 1;
         }
 
+        if (isAlive && isInvisible) currentAlpha = 0;
+
         this.emojiAlpha = currentAlpha;
+        this.livesAlpha = currentAlpha;
     }
 
     toggleAbilityIsActive() {
@@ -383,11 +377,14 @@ export class Player extends BaseEntity {
         this._nameTextSprite.alpha = alpha;
         this._emojiTextSprite.alpha = alpha;
         this._shadow.alpha = alpha;
-        this._livesSprite.alpha = alpha;
     }
 
     set arrowAlpha(alpha: number) {
         this._arrowSprite.alpha = alpha;
+    }
+
+    set livesAlpha(alpha: number) {
+        this._livesSprite.alpha = alpha;
     }
 
     set ability(ability: string) {

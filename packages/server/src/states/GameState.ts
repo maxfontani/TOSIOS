@@ -252,6 +252,9 @@ export class GameState extends Schema {
         const correctedPosition = this.walls.correctWithCircle(player.body);
         player.setPosition(correctedPosition.x, correctedPosition.y);
 
+        // Collisions: Invis
+        this.playerInvisCollision(player);
+    
         // Acknowledge last treated action
         player.ack = ts;
 
@@ -289,6 +292,21 @@ export class GameState extends Schema {
         }
 
         player.setRotation(rotation);
+    }
+
+    private playerInvisCollision(player: Player) {
+        this.players.forEach((otherPlayer) => { 
+            if (player || player !== otherPlayer) {
+                const iAmInvisible: boolean = player.abilityIsActive && player.ability === 'invisibility'
+                const playerIsInvisible: boolean = otherPlayer.abilityIsActive && otherPlayer.ability === 'invisibility'
+                if (Collisions.circleToCircle(player.body, otherPlayer.body)) {
+                    // If one of the collided players is invisible
+                    if ((iAmInvisible && !playerIsInvisible) || (!iAmInvisible && playerIsInvisible)) {
+                        iAmInvisible ? otherPlayer.hurt() : player.hurt()
+                    };
+                };
+            };
+        });
     }
 
     private playerShoot(id: string, ts: number, angle: number) {
@@ -329,6 +347,7 @@ export class GameState extends Schema {
                 }
                 player.lastShootAt = ts;
                 player.abilityIsActive = true;
+                this.playerInvisCollision(player);
                 setTimeout(() => {
                     player.abilityIsActive = false;
                 }, Constants.INVIS_DURATION)
@@ -373,10 +392,13 @@ export class GameState extends Schema {
 
     private setPlayersPositionRandomly() {
         let spawner: Geometry.RectangleBody;
+        let shifter = Maths.getRandomInt(0, this.spawners.length - 1) % (this.spawners.length - 1);
 
         this.players.forEach((player) => {
-            spawner = this.getSpawnerRandomly();
+            // spawner = this.getSpawnerRandomly();
+            spawner = this.spawners[shifter]
             player.setPosition(spawner.x + Constants.PLAYER_SIZE / 2, spawner.y + Constants.PLAYER_SIZE / 2);
+            shifter = (shifter + 1) % (this.spawners.length - 1);
             player.ack = 0;
         });
     }
@@ -515,6 +537,7 @@ export class GameState extends Schema {
             player.hurt();
 
             if (!player.isAlive) {
+                player.abilityIsActive = false;
                 this.onMessage({
                     type: 'killed',
                     from: 'server',

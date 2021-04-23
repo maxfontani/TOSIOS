@@ -219,6 +219,20 @@ export class Game {
                 player.y = Maths.lerp(player.y, player.toY, TOREMOVE_MAX_FPS_MS / TOREMOVE_AVG_LAG);
             }
         }
+
+        // Collisions: Invis
+        for (const player of this.playersManager.getAll()) {
+            if (this.me && player !== this.me) {
+                const iAmInvisible: boolean = this.me.abilityIsActive && this.me.ability === 'invisibility'
+                const playerIsInvisible: boolean = player.abilityIsActive && player.ability === 'invisibility'
+                if (Collisions.circleToCircle(player.body, this.me.body)) {
+                    // If one of the collided players is invisible
+                    if ((iAmInvisible && !playerIsInvisible) || (!iAmInvisible && playerIsInvisible)) {
+                        iAmInvisible ? player.hurt() : this.me.hurt()
+                    };
+                };
+            };
+        };
     };
 
     private updateMonsters = () => {
@@ -606,11 +620,17 @@ export class Game {
             this.me.team = attributes.team;
             this.me.abilityIsActive = attributes.abilityIsActive;
 
+            // Own lives are not visible above the player
+            this.me.livesAlpha = 0;
+
             // Make the players see their own emoji when invisible
             this.me.emojiAlpha = this.me.abilityIsActive ? 0.3 : 1;
 
             // If the player is dead, a special texture is displayed
-            if (!this.me.isAlive) this.me.emojiAlpha = 0;
+            if (!this.me.isAlive) { 
+                this.me.emojiAlpha = 0;
+                this.me.abilityIsActive = false;
+            }
 
             // Only the players own direction arrow is visible
             this.me.arrowAlpha = 1;
