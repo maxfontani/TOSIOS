@@ -1,11 +1,14 @@
-import { Health, Leaderboard, Menu, Messages, Players, Time } from './';
+import { Container, Health, Leaderboard, Menu, Messages, Players, Time } from './';
 import { Keys, Models } from '@tosios/common';
 import React, { CSSProperties } from 'react';
 import { Announce } from './Announce';
-import { View } from '../../components';
+import { View, Space } from '../../components';
 import { isMobile } from 'react-device-detect';
+import { Ability } from './Ability';
+import { PlayerAbility } from '@tosios/common/src/types';
+import { autoDetectRenderer } from 'pixi.js';
 
-const HUD_PADDING = isMobile ? 16 : 24;
+const HUD_PADDING = isMobile ? '0.3%' : '0.7%';
 
 export interface HUDProps {
     gameMode: string;
@@ -14,7 +17,8 @@ export interface HUDProps {
     roomName: string;
     playerId: string;
     playerName: string;
-    playerEmoji: string;
+    playerAbility: PlayerAbility;
+    playerLastShootAt: number;
     playerLives: number;
     playerMaxLives: number;
     players: Models.PlayerJSON[];
@@ -27,6 +31,7 @@ export interface HUDProps {
 /**
  * The interface displaying important information to the user:
  * - Lives
+ * - Ability cooldown
  * - Time left
  * - Number of players
  * - Chat
@@ -42,7 +47,8 @@ export const HUD = React.memo(
             gameModeEndsAt,
             roomName,
             playerName,
-            playerEmoji,
+            playerAbility,
+            playerLastShootAt,
             playerLives,
             playerMaxLives,
             players,
@@ -96,23 +102,32 @@ export const HUD = React.memo(
         }, []);
 
         return (
-            <View flex center fullscreen style={styles.hud}>
+            <View flex fullscreen style={styles.columnUp}>
                 {/* Menu */}
                 {menuOpened ? <Menu onClose={() => setMenuOpened(false)} onLeave={handleLeave} style={styles.menu}/> : null}
 
-                {/* Health */}
-                <Health name={playerName} lives={playerLives} maxLives={playerMaxLives} style={styles.health} />
+                <View flex style={styles.columnUp}>
+                    <Container style={styles.status}>
+                        {/* Health */}
+                        <Health name={playerName} lives={playerLives} maxLives={playerMaxLives} />
 
-                {/* Time */}
-                <Time mode={gameMode} endsAt={gameModeEndsAt} style={styles.time} />
+                        <Space size="xxs" />
 
-                {/* Players */}
-                <Players
-                    count={playersCount}
-                    maxCount={playersMaxCount}
-                    style={styles.players}
-                    onMenuClicked={() => setMenuOpened(true)}
-                />
+                        {/* Ability */}
+                        <Ability ability={playerAbility} tstart={playerLastShootAt} />
+                    </Container>
+
+                    {/* Time */}
+                    <Time mode={gameMode} endsAt={gameModeEndsAt} style={styles.time} />
+
+                    {/* Players */}
+                    <Players
+                        count={playersCount}
+                        maxCount={playersMaxCount}
+                        style={styles.players}
+                        onMenuClicked={() => setMenuOpened(true)}
+                    />
+                </View>
 
                 {/* Messages */}
                 {isMobile ? null : <Messages messages={messages} style={styles.messages} />}
@@ -138,8 +153,12 @@ export const HUD = React.memo(
 
 const styles: { [key: string]: CSSProperties } = {
     hud: {
+        display: 'flex',
+        justifyContent: 'space-between',
         padding: HUD_PADDING,
         pointerEvents: 'none',
+        width: '100%',
+        height: '100%'
     },
     menu:{
         position: 'absolute',
@@ -148,27 +167,26 @@ const styles: { [key: string]: CSSProperties } = {
         padding: 16,
         zIndex: 99,
     },
-    health: {
-        position: 'absolute',
-        left: HUD_PADDING,
-        top: HUD_PADDING,
+    columnUp: {
+        justifyContent: 'space-between', 
+        alignItems: 'flex-start', 
+        width: '98%',
+        padding: HUD_PADDING,
     },
-    time: {
-        position: 'absolute',
-        top: HUD_PADDING,
-        alignSelf: 'center',
-    },
-    players: {
-        position: 'absolute',
-        right: HUD_PADDING,
-        top: HUD_PADDING,
+    status: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        padding: HUD_PADDING,
     },
     messages: {
         position: 'absolute',
         left: HUD_PADDING,
-        bottom: HUD_PADDING,
+        bottom: '5%',
     },
     announce: {
         position: 'absolute',
+        top: '50%',
+        left: '40%'
     },
 };

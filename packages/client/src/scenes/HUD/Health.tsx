@@ -1,8 +1,6 @@
 import React, { CSSProperties } from 'react';
 import { Space, Text, View } from '../../components';
-
 import { heartEmptyImage, heartFullImage } from '../../images';
-import { Container } from './';
 import { isMobile } from 'react-device-detect';
 
 const HEART_SIZE = isMobile ? 24 : 36;
@@ -31,30 +29,26 @@ export const Health = React.memo(
         }
 
         return (
-            <Container
-                style={{
-                    ...styles.health,
-                    ...style,
-                }}
-            >
+            <div style={styles.column}>
                 <Text style={styles.nameText}>{name}</Text>
                 <Space size="xxs" />
-                <View style={styles.hearts}>{hearts}</View>
-            </Container>
+                <View style={styles.flexCenter}>{hearts}</View>
+            </div>
         );
     },
 );
 
 const styles: { [key: string]: CSSProperties } = {
-    health: {
+    column: {
         flexDirection: 'column',
-        alignItems: 'flex-start',
+        alignItems: 'center',
     },
     nameText: {
+        textAlign: 'center',
         color: 'white',
         fontSize: isMobile ? 14 : 16,
     },
-    hearts: {
+    flexCenter: {
         display: 'flex',
         alignItems: 'center',
     },

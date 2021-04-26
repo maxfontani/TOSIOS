@@ -10,6 +10,7 @@ import { SpriteSheets } from './assets/images/maps';
 import { Viewport } from 'pixi-viewport';
 import { GUITextures } from './assets/images';
 import { distanceBetween } from './utils/distance';
+import { PlayerAbility } from '@tosios/common/src/types';
 
 // We don't want to scale textures linearly because they would appear blurry.
 settings.SCALE_MODE = SCALE_MODES.NEAREST;
@@ -36,6 +37,8 @@ export interface Stats {
     gameMap: string;
     roomName: string;
     playerName: string;
+    playerAbility: PlayerAbility;
+    playerLastShootAt: number;
     playerLives: number;
     playerMaxLives: number;
     players: Models.PlayerJSON[];
@@ -536,6 +539,7 @@ export class Game {
             emoji: player.emoji,
             ability: player.ability,
             abilityIsActive: player.abilityIsActive,
+            lastShootAt: player.lastShootAt,
             color: player.color,
             lives: player.lives,
             maxLives: player.maxLives,
@@ -549,6 +553,8 @@ export class Game {
             gameMap: this.mapName || '',
             roomName: this.roomName || '',
             playerName: this.me ? this.me.name : '',
+            playerAbility: this.me ? this.me.ability : 'shoot',
+            playerLastShootAt: this.me ? this.me.lastShootAt : 0,
             playerLives: this.me ? this.me.lives : 0,
             playerMaxLives: this.me ? this.me.maxLives : 0,
             players,
@@ -620,8 +626,9 @@ export class Game {
             this.me.team = attributes.team;
             this.me.abilityIsActive = attributes.abilityIsActive;
 
-            // Own lives are not visible above the player
+            // Own lives and name are not visible above the player
             this.me.livesAlpha = 0;
+            this.me.nameAlpha = 0;
 
             // Make the players see their own emoji when invisible
             this.me.emojiAlpha = this.me.abilityIsActive ? 0.3 : 1;
@@ -632,8 +639,9 @@ export class Game {
                 this.me.abilityIsActive = false;
             }
 
-            // Only the players own direction arrow is visible
+            // Only the players own direction arrow and ability bar are visible
             this.me.arrowAlpha = 1;
+            // this.me.abilityAlpha = 1;
 
             if (attributes.ack !== this.me.ack) {
                 this.me.ack = attributes.ack;
@@ -754,14 +762,9 @@ export class Game {
 
     // COLYSEUS: Bullets
     bulletAdd = (bulletId: string, attributes: Models.BulletJSON) => {
-        console.log('BUL ADD');
-        
         if ((this.me && this.me.playerId === attributes.playerId) || !attributes.active) {
             return;
         }
-
-        console.log('BUL ADDED +');
-
         this.bulletsManager.addOrCreate(attributes, this.particlesContainer);
     };
 

@@ -1,6 +1,6 @@
 import { CircleBody } from '../geometry';
 import { Maths } from '..';
-import { Teams } from '../types';
+import { PlayerAbility, Teams } from '../types';
 import { TreeCollider } from '../collisions';
 
 export interface PlayerJSON {
@@ -11,7 +11,7 @@ export interface PlayerJSON {
     playerId: string;
     name: string;
     emoji: string;
-    ability: string;
+    ability: PlayerAbility;
     abilityIsActive: boolean;
     lives: number;
     maxLives: number;

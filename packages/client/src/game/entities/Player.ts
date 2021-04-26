@@ -5,8 +5,9 @@ import { PlayerTextures, WeaponTextures } from '../assets/images';
 import { SmokeConfig, SmokeTexture } from '../assets/particles';
 import { BaseEntity } from '.';
 import { Emitter } from 'pixi-particles';
+import { PlayerAbility } from '@tosios/common/src/types';
 
-const NAME_OFFSET = 7;
+const NAME_OFFSET = 4;
 const LIVES_OFFSET = 6;
 const HURT_COLOR = 0xff0000;
 const HEAL_COLOR = 0x00ff00;
@@ -28,7 +29,7 @@ export class Player extends BaseEntity {
 
     private _emoji: string = '';
 
-    private _ability: string = '';
+    private _ability: PlayerAbility = 'shoot';
 
     private _abilityIsActive: boolean = false;
 
@@ -65,6 +66,8 @@ export class Player extends BaseEntity {
 
     private _livesSprite: PlayerLivesSprite;
 
+    // private _abilitySprite: AbilitySprite;
+
     public ack?: number;
 
     private _shadow: Graphics;
@@ -98,9 +101,10 @@ export class Player extends BaseEntity {
 
         // Name
         this._nameTextSprite = new TextSprite(player.name, 8, 0.5, 1);
-        this._nameTextSprite.position.set(player.radius, -NAME_OFFSET);
+        this._nameTextSprite.position.set(player.radius, NAME_OFFSET);
         this._nameTextSprite.zIndex = ZINDEXES.INFOS;
         this.container.addChild(this._nameTextSprite);
+
         // Emoji
         this._emojiTextSprite = new TextSprite(player.emoji, 24, 0, 0);
         this._emojiTextSprite.position.set(2, 4);
@@ -117,12 +121,20 @@ export class Player extends BaseEntity {
         this._livesSprite.zIndex = ZINDEXES.INFOS;
         this.container.addChild(this._livesSprite);
 
+        // Ability
+        // this._abilitySprite = new AbilitySprite(0.5, 1, 25, 8, 0, {single: abilityBarTexture})
+        // this._abilitySprite.position.set(player.radius, NAME_OFFSET);
+        // this._abilitySprite.anchorX = 0.5;
+        // this._abilitySprite.alpha = 0;
+        // this._abilitySprite.zIndex = ZINDEXES.INFOS;
+        // this.container.addChild(this._abilitySprite);
+
         // Shadow
         this._shadow = new Graphics();
         this._shadow.zIndex = ZINDEXES.SHADOW;
         this._shadow.pivot.set(0.5);
         this._shadow.beginFill(0x000000, 0.3);
-        this._shadow.drawEllipse(player.radius * 0.9, player.radius * 1.85, player.radius * 0.5, player.radius * 0.25);
+        this._shadow.drawEllipse(player.radius * 0.9, player.radius * 1.85, player.radius * 0.65, player.radius * 0.25);
         this._shadow.endFill();
         this.container.addChild(this._shadow);
 
@@ -193,8 +205,8 @@ export class Player extends BaseEntity {
         let currentAlpha = 1;
         this.sprite.textures = PlayerTextures.playerDeadTextures;
         this.sprite.anchor.set(0.5);
-        this.sprite.width = this.body.width;
-        this.sprite.height = this.body.height;
+        this.sprite.width = this.body.width * 0.75;
+        this.sprite.height = this.body.height * 0.75;
 
         if (!isAlive) {
             this.sprite.visible = true;
@@ -208,6 +220,7 @@ export class Player extends BaseEntity {
 
         if (isAlive && isInvisible) currentAlpha = 0;
 
+        this.nameAlpha = currentAlpha;
         this.emojiAlpha = currentAlpha;
         this.livesAlpha = currentAlpha;
     }
@@ -373,8 +386,11 @@ export class Player extends BaseEntity {
         this._emojiTextSprite.text = emoji;
     }
 
-    set emojiAlpha(alpha: number) {
+    set nameAlpha(alpha: number) {
         this._nameTextSprite.alpha = alpha;
+    }
+
+    set emojiAlpha(alpha: number) {
         this._emojiTextSprite.alpha = alpha;
         this._shadow.alpha = alpha;
     }
@@ -387,7 +403,11 @@ export class Player extends BaseEntity {
         this._livesSprite.alpha = alpha;
     }
 
-    set ability(ability: string) {
+    // set abilityAlpha(alpha: number) {
+    //     this._abilitySprite.alpha = alpha;
+    // }
+
+    set ability(ability: PlayerAbility) {
         this._ability = ability;
     }
 

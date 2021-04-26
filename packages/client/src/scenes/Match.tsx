@@ -44,7 +44,8 @@ export default class Match extends Component<IProps, IState> {
                 roomName: '',
                 playerId: '',
                 playerName: '',
-                playerEmoji: '',
+                playerAbility: 'shoot',
+                playerLastShootAt: 0,
                 playerLives: 0,
                 playerMaxLives: 0,
                 players: [],
@@ -321,7 +322,8 @@ export default class Match extends Component<IProps, IState> {
                     gameModeEndsAt={hud.gameModeEndsAt}
                     roomName={hud.roomName}
                     playerName={hud.playerName}
-                    playerEmoji={hud.playerEmoji}
+                    playerAbility={hud.playerAbility}
+                    playerLastShootAt={hud.playerLastShootAt}
                     playerLives={hud.playerLives}
                     playerMaxLives={hud.playerMaxLives}
                     players={hud.players}
