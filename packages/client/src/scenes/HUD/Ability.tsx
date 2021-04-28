@@ -1,15 +1,13 @@
-import React, { CSSProperties } from 'react';
-import { Space, Text, View } from '../../components';
+import React, { CSSProperties, useEffect, useState } from 'react';
+import { Space, Text } from '../../components';
 import { isMobile } from 'react-device-detect';
 import { Constants } from '@tosios/common'
 import ProgressBar from '../../components/ProgressBar'
 import { PlayerAbility } from '@tosios/common/src/types';
 
-const BAR_COLOR = "#6a1b9a";
 const DEFAULT_RATE = 2000;
 
 const { BULLET_RATE, INVIS_RATE, CHARGE_RATE } = Constants
-
 
 /**
  * Render the ability cooldown bar of the player.
@@ -17,8 +15,8 @@ const { BULLET_RATE, INVIS_RATE, CHARGE_RATE } = Constants
 export const Ability = (props: { ability: PlayerAbility; tstart: number}): React.ReactElement => {
         let { ability, tstart } = props;
 
+        const [completed, setCompleted] = useState(100)
         let abilityRate = DEFAULT_RATE;
-        let completed = 100;
 
         switch(ability) {
             case 'shoot':
@@ -34,16 +32,27 @@ export const Ability = (props: { ability: PlayerAbility; tstart: number}): React
                 break;  
         }
 
-        let sinceLastShoot = Date.now() - tstart
-        if (sinceLastShoot < abilityRate) {
-            completed = Math.round((sinceLastShoot / abilityRate) * 100)  
+        useEffect(() => {
+            setCompleted(0)
+            const timerProgressBar = setInterval(updateProgressBar, 250, tstart);
+            setTimeout(() => clearInterval(timerProgressBar), abilityRate+150)
+        }, [tstart])
+        
+        function updateProgressBar(tstart:number) {
+            const sinceLastShoot = Date.now() - tstart
+            console.log('UPD PB');
+            if (sinceLastShoot < abilityRate) {
+                setCompleted(Math.round((abilityRate - sinceLastShoot) / 1000))
+            } else {
+                setCompleted(100);
+            }
         }
-
+        
         return (
             <div style={styles.column}>
                 <Text style={styles.text}>Cooldown</Text>
                 <Space size="xxs" />
-                <ProgressBar bgcolor={BAR_COLOR} complete={completed} />
+                <ProgressBar complete={completed} />
             </div>
         );
     }

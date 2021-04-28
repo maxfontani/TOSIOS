@@ -38,7 +38,8 @@ export interface HUDProps {
  * - Leaderboard
  * - Menu
  */
-export const HUD = React.memo(
+export const HUD = 
+// React.memo(
     (props: HUDProps): React.ReactElement => {
         const {
             playerId,
@@ -148,8 +149,9 @@ export const HUD = React.memo(
 
             </View>
         );
-    },
-);
+    }
+    // ,
+// );
 
 const styles: { [key: string]: CSSProperties } = {
     hud: {

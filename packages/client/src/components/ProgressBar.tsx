@@ -1,42 +1,56 @@
 import React, { CSSProperties, useEffect } from 'react';
+import starFull from '../images/star-full.png'
+import starEmpty from '../images/star-empty.png'
 
-
-const ProgressBar = (props: {bgcolor: string, complete: number}): React.ReactElement => {
-  let { bgcolor, complete } = props;
+const ProgressBar = (props: {complete: number}): React.ReactElement => {
+  const { complete } = props;
 
   // The progress bar turns green if the ability is ready
-  bgcolor = complete === 100 ? "#008000" : bgcolor;
+  // bgcolor = complete === 100 ? "#008000" : bgcolor;
 
   const styles: { [key: string]: CSSProperties } = {
     containerStyles: {
-    height: 20,
-    width: '100%',
-    backgroundColor: "#e0e0de",
-    borderRadius: 50,
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignSelf: 'center',
+      alignItems: 'center',
+      flexWrap: 'nowrap',
+      height: '32px',
+      width: '100%',
     },
-    fillerStyles: {
-      height: '100%',
-      width: `${complete}%`,
-      backgroundColor: bgcolor,
-      borderRadius: 'inherit',
-      textAlign: 'right',
-      // transition: ''
-    },
-    labelStyles: {
-      padding: 5,
+    seconds: {
+      position: 'absolute',
+      left: '50%',
+      transform: 'translateX(-50%)',
       color: 'white',
-      fontWeight: 'bold'
-    }}
-
-  complete < 700 ? styles.fillerStyles.transition = 'width 1s ease-in-out' : styles.fillerStyles.transition = '';
+      fontWeight: 'bolder',
+      fontSize: '16px'
+    },
+    star: {
+      position: 'absolute',
+      left: '50%',
+      transform: 'translateX(-50%)',
+    }
+  }
 
   return (
-    <div style={styles.containerStyles}>
-      <div style={styles.fillerStyles}>
-        <span style={styles.labelStyles}></span>
-      </div>
+    <div>
+      {complete === 100 
+        ? <div style={styles.containerStyles}> 
+            <img style={styles.star} alt='' src={starFull} width='32' height='32' />  
+          </div>
+        : <div style={styles.containerStyles}>
+            <img style={styles.star} alt='' src={starEmpty} width='32' height='32' />
+            <div style={styles.seconds}>
+              {complete}
+            </div>
+          </div>
+      }
     </div>
   );
 };
 
 export default ProgressBar;
+
