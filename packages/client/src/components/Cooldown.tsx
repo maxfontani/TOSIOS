@@ -37,7 +37,7 @@ const Cooldown = (props: {complete: number}): React.ReactElement => {
 
   return (
     <div>
-      {complete === 100 || complete === 0
+      {complete === 100
         ? <div style={styles.containerStyles}> 
             <img style={styles.star} alt='' src={starFull} width='32' height='32' />  
           </div>

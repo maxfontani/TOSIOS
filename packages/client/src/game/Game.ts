@@ -633,18 +633,17 @@ export class Game {
             this.me.livesAlpha = 0;
             this.me.nameAlpha = 0;
 
-            // Make the players see their own emoji when invisible
-            this.me.emojiAlpha = this.me.abilityIsActive ? 0.3 : 1;
+            // Only the players own direction arrow is visible
+            this.me.arrowAlpha = 1;
 
             // If the player is dead, a special texture is displayed
-            if (!this.me.isAlive) { 
-                this.me.emojiAlpha = 0;
+            if (this.me.isAlive) { 
+                // Make the players see their own emoji when invisible
+                this.me.emojiAlpha = this.me.abilityIsActive ? 0.3 : 1;
+            } else {
                 this.me.abilityIsActive = false;
+                this.me.emojiAlpha = 0;
             }
-
-            // Only the players own direction arrow and ability bar are visible
-            this.me.arrowAlpha = 1;
-            // this.me.abilityAlpha = 1;
 
             if (attributes.ack !== this.me.ack) {
                 this.me.ack = attributes.ack;

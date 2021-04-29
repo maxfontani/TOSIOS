@@ -18,8 +18,6 @@ export const Ability = (props: { ability: PlayerAbility; lastShootAt: number}): 
         const [complete, setComplete] = useState(100);
 
         useEffect(() => {
-            // console.log('useEFF ', ability);
-            
             switch(ability) {
                 case 'shoot':
                     setAbilityRate(BULLET_RATE);
@@ -35,19 +33,6 @@ export const Ability = (props: { ability: PlayerAbility; lastShootAt: number}): 
             }
         }, [ability])
 
-        // useEffect(() => {   
-        //     const timerCooldownBar = setInterval(() => {
-        //         let newLastShootAt = getLastShootAt();
-        //         if (lastShootAt !== newLastShootAt) {
-        //             setLastShootAt(newLastShootAt);
-        //             updateProgressBar(newLastShootAt);
-        //         }
-        //     }, 250)
-        //     return () => {
-        //         clearInterval(timerCooldownBar);
-        //         }
-        // }, []) 
-
         useEffect(() => {
             lastShootAt === 0 || !ability 
                 ? setComplete(100) 
@@ -56,13 +41,15 @@ export const Ability = (props: { ability: PlayerAbility; lastShootAt: number}): 
         }, [lastShootAt])
 
         function updateProgressBar(lastShootAt: number) {
-            // console.log('UPD PR BAR ', ability, abilityRate);
             const timerCooldown = setInterval(() => {
             const sinceLastShoot = Date.now() - lastShootAt;
-            sinceLastShoot < abilityRate 
-                ? setComplete(Math.round((abilityRate - sinceLastShoot) / 1000))
-                : clearInterval(timerCooldown)
-            }, 150);
+            if (sinceLastShoot < abilityRate) {
+                setComplete(Math.floor((abilityRate - sinceLastShoot) / 1000))
+            } else {
+                setComplete(100)
+                clearInterval(timerCooldown)
+            }
+            }, 200);
         }
         
         return (

@@ -29,7 +29,7 @@ export class Player extends BaseEntity {
 
     private _emoji: string = '';
 
-    private _ability: PlayerAbility = 'shoot';
+    private _ability: PlayerAbility = '';
 
     private _abilityIsActive: boolean = false;
 
@@ -210,8 +210,9 @@ export class Player extends BaseEntity {
 
         if (!isAlive) {
             this.sprite.visible = true;
+            this.sprite.alpha = DEAD_ALPHA;
             this.sprite.play();
-            currentAlpha = DEAD_ALPHA;
+            currentAlpha = 0;
         } else {
             this.sprite.stop()
             this.sprite.visible = false;
