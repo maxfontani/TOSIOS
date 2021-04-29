@@ -18,7 +18,6 @@ export interface HUDProps {
     playerId: string;
     playerName: string;
     playerAbility: PlayerAbility;
-    playerLastShootAt: number;
     playerLives: number;
     playerMaxLives: number;
     players: Models.PlayerJSON[];
@@ -39,8 +38,8 @@ export interface HUDProps {
  * - Menu
  */
 export const HUD = 
-// React.memo(
-    (props: HUDProps): React.ReactElement => {
+React.memo(
+    (props: {hud: HUDProps, getLastShootAt: any}): React.ReactElement => {
         const {
             playerId,
             gameMode,
@@ -49,17 +48,18 @@ export const HUD =
             roomName,
             playerName,
             playerAbility,
-            playerLastShootAt,
             playerLives,
             playerMaxLives,
             players,
             playersCount,
             playersMaxCount,
             messages,
-            announce,
-        } = props;
+            announce
+        } = props.hud;
+        const getLastShootAt = props.getLastShootAt;
         const [leaderboardOpened, setLeaderboardOpened] = React.useState(false);
         const [menuOpened, setMenuOpened] = React.useState(false);
+        const [lastShootAt, setLastShootAt] = React.useState(0);
 
         const handleLeave = () => {
             window.location.href = window.location.origin;
@@ -73,6 +73,18 @@ export const HUD =
                 event.stopPropagation();
                 setLeaderboardOpened(true);
             }
+
+            if (Keys.SHOOT.includes(key)) {
+                setTimeout(() => {
+                    setLastShootAt(getLastShootAt())}, 150)
+            }
+        };
+
+        const handleMouseDown = (event: any) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setTimeout(() => {
+                setLastShootAt(getLastShootAt())}, 150)
         };
 
         const handleKeyUp = (event: any) => {
@@ -95,10 +107,12 @@ export const HUD =
         React.useEffect(() => {
             window.document.addEventListener('keydown', handleKeyDown);
             window.document.addEventListener('keyup', handleKeyUp);
+            window.document.addEventListener('mousedown', handleMouseDown);
 
             return () => {
                 window.document.removeEventListener('keydown', handleKeyDown);
                 window.document.removeEventListener('keyup', handleKeyUp);
+                window.document.removeEventListener('mousedown', handleMouseDown);
             };
         }, []);
 
@@ -115,7 +129,7 @@ export const HUD =
                         <Space size="xxs" />
 
                         {/* Ability */}
-                        <Ability ability={playerAbility} tstart={playerLastShootAt} />
+                        <Ability ability={playerAbility} lastShootAt={lastShootAt}/>
                     </Container>
 
                     {/* Time */}
@@ -150,8 +164,8 @@ export const HUD =
             </View>
         );
     }
-    // ,
-// );
+    ,
+);
 
 const styles: { [key: string]: CSSProperties } = {
     hud: {

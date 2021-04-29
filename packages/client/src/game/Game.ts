@@ -539,7 +539,6 @@ export class Game {
             emoji: player.emoji,
             ability: player.ability,
             abilityIsActive: player.abilityIsActive,
-            lastShootAt: player.lastShootAt,
             color: player.color,
             lives: player.lives,
             maxLives: player.maxLives,
@@ -553,7 +552,7 @@ export class Game {
             gameMap: this.mapName || '',
             roomName: this.roomName || '',
             playerName: this.me ? this.me.name : '',
-            playerAbility: this.me ? this.me.ability : 'shoot',
+            playerAbility: this.me ? this.me.ability : '',
             playerLastShootAt: this.me ? this.me.lastShootAt : 0,
             playerLives: this.me ? this.me.lives : 0,
             playerMaxLives: this.me ? this.me.maxLives : 0,
@@ -561,6 +560,10 @@ export class Game {
             playersCount: players.length,
             playersMaxCount: this.maxPlayers,
         };
+    };
+
+    getLastShootAt = (): number => {
+        return this.me ? this.me.lastShootAt : 0;
     };
 
     //

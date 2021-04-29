@@ -2,57 +2,74 @@ import React, { CSSProperties, useEffect, useState } from 'react';
 import { Space, Text } from '../../components';
 import { isMobile } from 'react-device-detect';
 import { Constants } from '@tosios/common'
-import ProgressBar from '../../components/ProgressBar'
+import Cooldown from '../../components/Cooldown'
 import { PlayerAbility } from '@tosios/common/src/types';
 
 const DEFAULT_RATE = 2000;
 
-const { BULLET_RATE, INVIS_RATE, CHARGE_RATE } = Constants
+const { BULLET_RATE, INVIS_RATE, CHARGE_RATE } = Constants;
 
 /**
  * Render the ability cooldown bar of the player.
  */
-export const Ability = (props: { ability: PlayerAbility; tstart: number}): React.ReactElement => {
-        let { ability, tstart } = props;
-
-        const [completed, setCompleted] = useState(100)
-        let abilityRate = DEFAULT_RATE;
-
-        switch(ability) {
-            case 'shoot':
-                abilityRate = BULLET_RATE;
-                break;
-            case 'invisibility':
-                abilityRate = INVIS_RATE;
-                break;
-            case 'charge':
-                abilityRate = CHARGE_RATE;
-                break;
-            default:
-                break;  
-        }
+export const Ability = (props: { ability: PlayerAbility; lastShootAt: number}): React.ReactElement => {
+        let { ability, lastShootAt } = props;
+        const [abilityRate, setAbilityRate] = useState(DEFAULT_RATE);
+        const [complete, setComplete] = useState(100);
 
         useEffect(() => {
-            setCompleted(0)
-            const timerProgressBar = setInterval(updateProgressBar, 250, tstart);
-            setTimeout(() => clearInterval(timerProgressBar), abilityRate+150)
-        }, [tstart])
-        
-        function updateProgressBar(tstart:number) {
-            const sinceLastShoot = Date.now() - tstart
-            console.log('UPD PB');
-            if (sinceLastShoot < abilityRate) {
-                setCompleted(Math.round((abilityRate - sinceLastShoot) / 1000))
-            } else {
-                setCompleted(100);
+            // console.log('useEFF ', ability);
+            
+            switch(ability) {
+                case 'shoot':
+                    setAbilityRate(BULLET_RATE);
+                    break;
+                case 'invisibility':
+                    setAbilityRate(INVIS_RATE);
+                    break;
+                case 'charge':
+                    setAbilityRate(CHARGE_RATE);
+                    break;
+                default:
+                    break;  
             }
+        }, [ability])
+
+        // useEffect(() => {   
+        //     const timerCooldownBar = setInterval(() => {
+        //         let newLastShootAt = getLastShootAt();
+        //         if (lastShootAt !== newLastShootAt) {
+        //             setLastShootAt(newLastShootAt);
+        //             updateProgressBar(newLastShootAt);
+        //         }
+        //     }, 250)
+        //     return () => {
+        //         clearInterval(timerCooldownBar);
+        //         }
+        // }, []) 
+
+        useEffect(() => {
+            lastShootAt === 0 || !ability 
+                ? setComplete(100) 
+                : updateProgressBar(lastShootAt);
+
+        }, [lastShootAt])
+
+        function updateProgressBar(lastShootAt: number) {
+            // console.log('UPD PR BAR ', ability, abilityRate);
+            const timerCooldown = setInterval(() => {
+            const sinceLastShoot = Date.now() - lastShootAt;
+            sinceLastShoot < abilityRate 
+                ? setComplete(Math.round((abilityRate - sinceLastShoot) / 1000))
+                : clearInterval(timerCooldown)
+            }, 150);
         }
         
         return (
             <div style={styles.column}>
                 <Text style={styles.text}>Cooldown</Text>
                 <Space size="xxs" />
-                <ProgressBar complete={completed} />
+                <Cooldown complete={complete} />
             </div>
         );
     }

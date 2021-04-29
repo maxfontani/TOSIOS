@@ -2,7 +2,7 @@ import React, { CSSProperties, useEffect } from 'react';
 import starFull from '../images/star-full.png'
 import starEmpty from '../images/star-empty.png'
 
-const ProgressBar = (props: {complete: number}): React.ReactElement => {
+const Cooldown = (props: {complete: number}): React.ReactElement => {
   const { complete } = props;
 
   // The progress bar turns green if the ability is ready
@@ -37,7 +37,7 @@ const ProgressBar = (props: {complete: number}): React.ReactElement => {
 
   return (
     <div>
-      {complete === 100 
+      {complete === 100 || complete === 0
         ? <div style={styles.containerStyles}> 
             <img style={styles.star} alt='' src={starFull} width='32' height='32' />  
           </div>
@@ -52,5 +52,5 @@ const ProgressBar = (props: {complete: number}): React.ReactElement => {
   );
 };
 
-export default ProgressBar;
+export default Cooldown;
 

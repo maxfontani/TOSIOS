@@ -56,7 +56,7 @@ export default class Home extends Component<IProps, IState> {
         this.state = {
             playerName: '',
             playerEmoji: '',
-            playerAbility: 'shoot',
+            playerAbility: '',
             hasNameChanged: false,
             hasEmojiChanged: false,
             isNewRoom: false,

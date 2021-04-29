@@ -16,7 +16,8 @@ interface IProps extends RouteComponentProps {
 
 interface IState {
     hud: HUDProps;
-}
+    lastShootAt: any; 
+    };
 
 export default class Match extends Component<IProps, IState> {
     private canvasRef: RefObject<HTMLDivElement>;
@@ -44,8 +45,7 @@ export default class Match extends Component<IProps, IState> {
                 roomName: '',
                 playerId: '',
                 playerName: '',
-                playerAbility: 'shoot',
-                playerLastShootAt: 0,
+                playerAbility: '',
                 playerLives: 0,
                 playerMaxLives: 0,
                 players: [],
@@ -54,6 +54,7 @@ export default class Match extends Component<IProps, IState> {
                 messages: [],
                 announce: '',
             },
+            lastShootAt: null
         };
     }
 
@@ -316,21 +317,23 @@ export default class Match extends Component<IProps, IState> {
 
                 {/* HUD: GUI, menu, leaderboard */}
                 <HUD
-                    playerId={hud.playerId}
-                    gameMode={hud.gameMode}
-                    gameMap={hud.gameMap}
-                    gameModeEndsAt={hud.gameModeEndsAt}
-                    roomName={hud.roomName}
-                    playerName={hud.playerName}
-                    playerAbility={hud.playerAbility}
-                    playerLastShootAt={hud.playerLastShootAt}
-                    playerLives={hud.playerLives}
-                    playerMaxLives={hud.playerMaxLives}
-                    players={hud.players}
-                    playersCount={hud.playersCount}
-                    playersMaxCount={hud.playersMaxCount}
-                    messages={hud.messages}
-                    announce={hud.announce}
+                    hud = {hud}
+                    // playerId={hud.playerId}
+                    // gameMode={hud.gameMode}
+                    // gameMap={hud.gameMap}
+                    // gameModeEndsAt={hud.gameModeEndsAt}
+                    // roomName={hud.roomName}
+                    // playerName={hud.playerName}
+                    // playerAbility={hud.playerAbility}
+                    // // playerLastShootAt={hud.playerLastShootAt}
+                    // playerLives={hud.playerLives}
+                    // playerMaxLives={hud.playerMaxLives}
+                    // players={hud.players}
+                    // playersCount={hud.playersCount}
+                    // playersMaxCount={hud.playersMaxCount}
+                    // messages={hud.messages}
+                    // announce={hud.announce}
+                    getLastShootAt={this.game.getLastShootAt}
                 />
             </View>
         );

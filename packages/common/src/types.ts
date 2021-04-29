@@ -2,7 +2,7 @@ export type GameState = 'waiting' | 'lobby' | 'game';
 export type GameMode = 'deathmatch' | 'team deathmatch';
 export type Teams = 'Red' | 'Blue';
 export type WallCollisionType = 'full' | 'none';
-export type PlayerAbility = 'shoot' | 'invisibility' | 'charge'
+export type PlayerAbility = 'shoot' | 'invisibility' | 'charge' | ''
 export type PlayerDirection = 'up' | 'down' | 'left' | 'right';
 export type IconColor = 'red' | 'blue' | 'green' | 'yellow';
 
