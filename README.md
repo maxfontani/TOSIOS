@@ -21,10 +21,18 @@ Want to play right away? You can play the game by following (and sharing) this l
 
 The game principles are fairly easy to grasp:
 
-1. Every player is positionned randomly on the map during the `lobby`.
-2. When the `game` starts, each player must take down others (either in death match, or team death match).
-3. There are some `potions` on the map that restore health.
-4. The last player (or team) alive wins 🎉.
+1. Players choose their emoji corresponding to one of three special abilities:
+
+- shooting &#129497;
+- invisibility &#129499;
+- charging &#129423;
+
+2. Bullets can't hurt invisible players.
+3. Invisible players cant's hurt charging players.
+4. Every player is positionned randomly on the map during the `lobby`.
+5. When the `game` starts, each player must take down others.
+6. There are some `potions` on the map that restore health.
+7. The last player (or team) alive wins 🎉.
 
 You can see a very small amount of gameplay below (the framerate of this GIF is low):
 
@@ -34,7 +42,7 @@ You can see a very small amount of gameplay below (the framerate of this GIF is 
 
 - Move: <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or <kbd>↑</kbd> <kbd>←</kbd> <kbd>↓</kbd> <kbd>→</kbd>.
 - Aim: <kbd>Mouse</kbd>
-- Shoot: <kbd>Left click</kbd> or <kbd>Space</kbd>
+- Use Ability: <kbd>Left click</kbd> or <kbd>Space</kbd>
 
 ## 🚀 Running
 
@@ -177,38 +185,9 @@ export const MAPS_NAMES = ["gigantic", "custom"]; // <- Add this entry
 // ...
 ```
 
-## Roadmap for v1.0.0
-
-This is not an exhaustive, nor final, features list but it will give you a good indication on what I am working on:
-
-- [x] Let users select the number of players in a room.
-- [x] Publish the docker image onto a registry and add a `docker-compose` file.
-- [x] Add a playable demo website for anyone to test and play the game.
-- [x] Add mobile mode (updated GUI and virtual joysticks).
-- [x] Add visual feedback when a player gets hit.
-- [x] Add smoother bullets.
-- [x] Implement a R-Tree for performances.
-- [x] Add players spawner object instead of randomized points.
-- [x] Add support for JSON TMX format (Tiled).
-- [x] Add a Team Death Match mode.
-- [x] Add some monsters. (Q1 2020)
-- [x] Improve the UI of the game menu. (Q2 2020)
-- [x] Improve particle effects. (Q3 2020)
-- [x] Add analytics
-- [x] Add sound effects. (Q3 2020)
-- [ ] Add powers up and pickable items. (Q4 2020)
-- [ ] Add ground monster. (Q4 2020)
-- [ ] Add random dungeon generation. (Q4 2020)
-
 ## Special thanks
 
-Thanks to [@endel](https://github.com/endel) for his fabulous work on [Colyseus](https://github.com/colyseus/colyseus) that made this game possible.
-
-Thanks to the [PIXI.js](https://github.com/pixijs/pixi.js) team for their incredible library and up-to-date documentation.
-
-Thanks to [@pixel_poem](https://twitter.com/pixel_poem) for the art package he published on Itch.io which made this game looks cool instantly.
-
-Thanks to [@thorbjorn81](https://twitter.com/thorbjorn81) for the many years of work on the [Tiled](https://github.com/bjorn/tiled) map editor.
+Big thanks to [@halftheopposite](https://github.com/halftheopposite) for the original repository behind the game.
 
 ## Licenses
 
