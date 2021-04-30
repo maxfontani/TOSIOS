@@ -1,6 +1,10 @@
 {
     "name": "@tosios/common",
     "version": "0.15.0",
+    "engines": {
+        "node": "14.x",
+        "yarn": "1.22.x"
+      },
     "private": true,
     "main": "build/index.js",
     "typings": "build/index.d.ts",

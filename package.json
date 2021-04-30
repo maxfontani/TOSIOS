@@ -1,19 +1,23 @@
 {
-  "name": "tosios",
+  "name": "moji-warz",
   "version": "0.15.0",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/halftheopposite/tosios"
+    "url": "https://github.com/maxfontani/moji-warz"
   },
   "author": {
-    "name": "Aymeric Chauvin",
-    "url": "https://halftheopposite.dev"
+    "name": "Max Fontani",
+    "url": "https://github.com/maxfontani/"
   },
   "workspaces": {
     "packages": [
       "packages/*"
     ]
+  },
+  "engines": {
+    "node": "14.x",
+    "yarn": "1.22.x"
   },
   "scripts": {
     "clean:dependencies": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' +",

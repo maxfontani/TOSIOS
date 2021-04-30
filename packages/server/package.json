@@ -2,6 +2,10 @@
     "name": "@tosios/server",
     "version": "0.15.0",
     "private": true,
+    "engines": {
+        "node": "14.x",
+        "yarn": "1.22.x"
+      },
     "main": "./build/index.js",
     "dependencies": {
         "@colyseus/monitor": "^0.14.0",
