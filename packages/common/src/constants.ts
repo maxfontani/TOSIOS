@@ -68,5 +68,7 @@ export const BULLET_SPEED = 8;
 export const BULLET_RATE = 2000; // The bigger, the slower. Default 2000.
 export const INVIS_RATE = 7000; // Invisibility ability rate. The bigger, the rarer. Default 3000.
 export const INVIS_DURATION = 6000; // Invisibility duration. The bigger, the longer. 
-export const CHARGE_RATE = 3000; // Charging ability rate. The bigger, the rarer. Default 3000.
+export const CHARGE_RATE = 7000; // Charging ability rate. The bigger, the rarer. Default 3000.
+export const CHARGE_DURATION = 3000;
 export const MOVE_RATE = 500; // The bigger, the slower. 1000 = 1 move/second.
+export const CHARGE_MOVE_RATE = 250;

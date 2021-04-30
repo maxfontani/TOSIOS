@@ -237,7 +237,11 @@ export class GameState extends Schema {
 
         // Check if player can move
         const delta = ts - player.lastMoveAt;
-        if (player.lastMoveAt && delta < Constants.MOVE_RATE) {
+        let moveRate = Constants.MOVE_RATE
+        if (player.ability === 'charge' && player.abilityIsActive) {
+            moveRate = Constants.CHARGE_MOVE_RATE;
+        }
+        if (player.lastMoveAt && delta < moveRate) {
             return;
         }
         player.lastMoveAt = ts;
@@ -252,8 +256,8 @@ export class GameState extends Schema {
         const correctedPosition = this.walls.correctWithCircle(player.body);
         player.setPosition(correctedPosition.x, correctedPosition.y);
 
-        // Collisions: Invis
-        this.playerInvisCollision(player);
+        // Collisions: Ability
+        this.playerAbilityCollision(player);
     
         // Acknowledge last treated action
         player.ack = ts;
@@ -294,16 +298,22 @@ export class GameState extends Schema {
         player.setRotation(rotation);
     }
 
-    private playerInvisCollision(player: Player) {
+    private playerAbilityCollision(player: Player) {
         this.players.forEach((otherPlayer) => { 
             if (player || player !== otherPlayer) {
                 const iAmInvisible: boolean = player.abilityIsActive && player.ability === 'invisibility'
                 const playerIsInvisible: boolean = otherPlayer.abilityIsActive && otherPlayer.ability === 'invisibility'
+                const iAmCharging: boolean = player.abilityIsActive && player.ability === 'charge'
+                const playerIsCharging: boolean = otherPlayer.abilityIsActive && otherPlayer.ability === 'charge'
                 if (Collisions.circleToCircle(player.body, otherPlayer.body)) {
                     // If one of the collided players is invisible
-                    if ((iAmInvisible && !playerIsInvisible) || (!iAmInvisible && playerIsInvisible)) {
+                    if ((iAmInvisible && !playerIsInvisible && !playerIsCharging) || (!iAmInvisible && !iAmCharging && playerIsInvisible)) {
                         iAmInvisible ? otherPlayer.hurt() : player.hurt()
                     };
+                    // If one of the collided players is charging
+                    if ((iAmCharging && !playerIsCharging) || (!iAmCharging && playerIsCharging)) {
+                        iAmCharging ? otherPlayer.hurt() : player.hurt();
+                    }; 
                 };
             };
         });
@@ -339,20 +349,30 @@ export class GameState extends Schema {
                 break;
             case 'invisibility':
                 // Check if player can use the ability
-                console.log('GAME STATE INVIZ ');
-                
+               
                 const deltaInvis = ts - player.lastShootAt;
                 if (player.lastShootAt && deltaInvis < Constants.INVIS_RATE) {
                     return;
                 }
                 player.lastShootAt = ts;
                 player.abilityIsActive = true;
-                this.playerInvisCollision(player);
+                this.playerAbilityCollision(player);
                 setTimeout(() => {
                     player.abilityIsActive = false;
                 }, Constants.INVIS_DURATION)
                 break;
             case 'charge':
+                // Check if player can use the ability
+                const deltaCharge = ts - player.lastShootAt;
+                if (player.lastShootAt && deltaCharge < Constants.CHARGE_RATE) {
+                    return;
+                }
+                player.lastShootAt = ts;
+                player.abilityIsActive = true;
+                this.playerAbilityCollision(player);
+                setTimeout(() => {
+                    player.abilityIsActive = false;
+                }, Constants.CHARGE_DURATION)
                 break;
             default:
                 return;

@@ -135,21 +135,21 @@ export class Game extends Schema {
         }
 
         // Team Death Match
-        if (this.mode === 'team deathmatch') {
-            // Check to see if only one team is alive
-            const team = getWinningTeam(players);
-            if (team) {
-                this.onGameEnd({
-                    type: 'won',
-                    from: 'server',
-                    ts: Date.now(),
-                    params: {
-                        name: team === 'Red' ? 'Red team' : 'Blue team',
-                    },
-                });
-                this.startLobby();
-            }
-        }
+        // if (this.mode === 'team deathmatch') {
+        //     // Check to see if only one team is alive
+        //     const team = getWinningTeam(players);
+        //     if (team) {
+        //         this.onGameEnd({
+        //             type: 'won',
+        //             from: 'server',
+        //             ts: Date.now(),
+        //             params: {
+        //                 name: team === 'Red' ? 'Red team' : 'Blue team',
+        //             },
+        //         });
+        //         this.startLobby();
+        //     }
+        // }
     }
 
     // Start

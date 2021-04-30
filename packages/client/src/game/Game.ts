@@ -223,16 +223,22 @@ export class Game {
             }
         }
 
-        // Collisions: Invis
+        // Collisions: Ability
         for (const player of this.playersManager.getAll()) {
             if (this.me && player !== this.me) {
                 const iAmInvisible: boolean = this.me.abilityIsActive && this.me.ability === 'invisibility'
                 const playerIsInvisible: boolean = player.abilityIsActive && player.ability === 'invisibility'
+                const iAmCharging: boolean = this.me.abilityIsActive && this.me.ability === 'charge'
+                const playerIsCharging: boolean = player.abilityIsActive && player.ability === 'charge'
                 if (Collisions.circleToCircle(player.body, this.me.body)) {
                     // If one of the collided players is invisible
-                    if ((iAmInvisible && !playerIsInvisible) || (!iAmInvisible && playerIsInvisible)) {
+                    if ((iAmInvisible && !playerIsInvisible && !playerIsCharging) || (!iAmInvisible && !iAmCharging && playerIsInvisible)) {
                         iAmInvisible ? player.hurt() : this.me.hurt()
                     };
+                    // If one of the collided players is charging
+                    if ((iAmCharging && !playerIsCharging) || (!iAmCharging && playerIsCharging)) {
+                        iAmCharging ? player.hurt() : this.me.hurt()
+                    }; 
                 };
             };
         };
@@ -392,7 +398,7 @@ export class Game {
             this.moveActions.push(action);
             this.me.move(dir.x, dir.y, Constants.PLAYER_SPEED);
         } else {
-            dir.x= 0;
+            dir.x = 0;
             dir.y = 0;
         }
     };
@@ -482,9 +488,7 @@ export class Game {
                 });
                 break;
             case 'invisibility':
-                console.log('INVIZZ!!');
-
-                this.me.toggleAbilityIsActive();
+                this.me.toggleAbilityIsActive(Constants.INVIS_DURATION);
 
                 this.onActionSend({
                     type: 'shoot',
@@ -496,7 +500,17 @@ export class Game {
                 });
                 break;
             case 'charge':
-                console.log('CHARGE!!');
+                this.me.toggleAbilityIsActive(Constants.CHARGE_DURATION);
+
+                this.onActionSend({
+                    type: 'shoot',
+                    ts: Date.now(),
+                    playerId: this.me.playerId,
+                    value: {
+                        angle: this.me.rotation,
+                    },
+                });
+
                 break;  
             default:
                 break;
@@ -636,11 +650,12 @@ export class Game {
             // Only the players own direction arrow is visible
             this.me.arrowAlpha = 1;
 
+            // Make the players see their own emoji when invisible
+            this.me.emojiAlpha = this.me.abilityIsActive && this.me.ability === 'invisibility' ? 0.3 : 1;
+
+
             // If the player is dead, a special texture is displayed
-            if (this.me.isAlive) { 
-                // Make the players see their own emoji when invisible
-                this.me.emojiAlpha = this.me.abilityIsActive ? 0.3 : 1;
-            } else {
+            if (!this.me.isAlive) { 
                 this.me.abilityIsActive = false;
                 this.me.emojiAlpha = 0;
             }

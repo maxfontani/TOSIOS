@@ -6,11 +6,13 @@ import { SmokeConfig, SmokeTexture } from '../assets/particles';
 import { BaseEntity } from '.';
 import { Emitter } from 'pixi-particles';
 import { PlayerAbility } from '@tosios/common/src/types';
+import { CHARGE_DURATION } from '@tosios/common/src/constants';
 
 const NAME_OFFSET = 4;
 const LIVES_OFFSET = 6;
 const HURT_COLOR = 0xff0000;
 const HEAL_COLOR = 0x00ff00;
+const CHARGE_COLOR = 0x990000;
 const BULLET_DELAY_FACTOR = 1.1; // Add 10% to delay as server may lag behind sometimes (rarely)
 const SMOKE_DELAY = 3000;
 const DEAD_ALPHA = 0.2;
@@ -193,6 +195,12 @@ export class Player extends BaseEntity {
         Effects.flash(this._emojiTextSprite, HEAL_COLOR, utils.string2hex(this.color));
     }
 
+    // chargeTint() {
+    //     this.emojiTint = CHARGE_COLOR
+    //     setTimeout(() => 
+    //         this.emojiTint(utils.string2hex(this.color)), CHARGE_DURATION)
+    // }
+
     hide(duration?: number) {
         Effects.hide(this._emojiTextSprite, duration = Constants.INVIS_DURATION);
     }
@@ -200,6 +208,7 @@ export class Player extends BaseEntity {
     updateTextures() {
         const isAlive = this.lives > 0;
         const isInvisible = this.abilityIsActive && this.ability === 'invisibility'
+        const isCharging = this.abilityIsActive && this.ability === 'charge'
 
         // Sprites' alpha levels
         let currentAlpha = 1;
@@ -220,17 +229,18 @@ export class Player extends BaseEntity {
         }
 
         if (isAlive && isInvisible) currentAlpha = 0;
+        this.emojiTint = isAlive && isCharging ? CHARGE_COLOR : utils.string2hex(this.color);
 
         this.nameAlpha = currentAlpha;
         this.emojiAlpha = currentAlpha;
         this.livesAlpha = currentAlpha;
     }
 
-    toggleAbilityIsActive() {
+    toggleAbilityIsActive(duration: number) {
         this.abilityIsActive = true;
         setTimeout(() => {
             this.abilityIsActive = false;
-        }, Constants.INVIS_DURATION);
+        }, duration);
     }
 
     canShoot(): any {
@@ -251,12 +261,12 @@ export class Player extends BaseEntity {
                 }
                 this.lastShootAt = now; 
                 return 'invisibility';
-            // case 'charge':
-            //     if (now - this.lastShootAt < Constants.CHARGE_RATE * BULLET_DELAY_FACTOR) {
-            //         return false;
-            //     }
-            //     this.lastShootAt = now; 
-            //     return 'charge';  
+            case 'charge':
+                if (now - this.lastShootAt < Constants.CHARGE_RATE * BULLET_DELAY_FACTOR) {
+                    return false;
+                }
+                this.lastShootAt = now; 
+                return 'charge';  
             default:
                 return false;
             }
@@ -264,7 +274,11 @@ export class Player extends BaseEntity {
 
     canMove(): boolean {
         const now: number = Date.now();
-        if (now - this.lastMoveAt < Constants.MOVE_RATE) {
+        let moveRate: number = Constants.MOVE_RATE
+        if (this.ability === 'charge' && this.abilityIsActive) {
+            moveRate = Constants.CHARGE_MOVE_RATE;
+        }
+        if (now - this.lastMoveAt < moveRate) {
             return false;
         }
 
@@ -273,21 +287,13 @@ export class Player extends BaseEntity {
     }
 
     canBulletHurt(otherPlayerId: string, team?: string): boolean {
-        if (!this.isAlive) {
+        if (!this.isAlive || this.isGhost || this.playerId === otherPlayerId) {
             return false;
         }
 
-        if (this.isGhost) {
-            return false;
-        }
-
-        if (this.playerId === otherPlayerId) {
-            return false;
-        }
-
-        if (!!team && team === this.team) {
-            return false;
-        }
+        // if (!!team && team === this.team) {
+        //     return false;
+        // }
 
         // Bullets can't hurt invisible players
         const delta = Date.now() - this.lastShootAt
@@ -394,6 +400,10 @@ export class Player extends BaseEntity {
     set emojiAlpha(alpha: number) {
         this._emojiTextSprite.alpha = alpha;
         this._shadow.alpha = alpha;
+    }
+
+    set emojiTint(tintColor: number) {
+        this._emojiTextSprite.tint = tintColor;
     }
 
     set arrowAlpha(alpha: number) {
