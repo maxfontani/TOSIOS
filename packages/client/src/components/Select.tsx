@@ -21,7 +21,7 @@ export interface IListItem {
 
 export function Select(props: {
     value?: any;
-    values: string[] | number[];
+    values: any;
     style?: CSSProperties;
     onChange?: (event: SyntheticEvent) => void;
 }): React.ReactElement {

@@ -13,7 +13,7 @@ import {
     Icon
 } from '../components';
 import { Constants, Types } from '@tosios/common';
-import React, { Component, Fragment } from 'react';
+import React, { Component, CSSProperties, Fragment } from 'react';
 import { RouteComponentProps, navigate } from '@reach/router';
 import { Client } from 'colyseus.js';
 import { Helmet } from 'react-helmet';
@@ -248,6 +248,8 @@ export default class Home extends Component<IProps, IState> {
                     <Space size="m" />
                     {this.renderName()}
                     <Space size="m" />
+                    {/* {this.renderInfo()}
+                    <Space size="m" /> */}
                     {this.renderRoom()}
                     <Space size="m" />
                     <GitHub />
@@ -257,6 +259,22 @@ export default class Home extends Component<IProps, IState> {
     }
 
     renderName = () => {
+        const infoStyle = {
+            background: '#000000',
+            fontFamily: 'Bangers',
+            textAlign: 'center' as const,
+            color: '#FFFFFF',
+            display: 'flex',
+            flexDirection: 'column' as const,
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '150px',
+            height: '50px',
+            fontSize: '24px',
+            border: '2px solid black',
+            borderRadius: '10px',
+            margin: '0 10px',
+        }
         return (
             <Box
                 style={{
@@ -264,7 +282,7 @@ export default class Home extends Component<IProps, IState> {
                     maxWidth: '100%',
                 }}
             >
-                <Text style={{textAlign: 'center', fontWeight:900}}>
+                <Text style={{fontFamily: 'Consolas', fontSize: '18px', textAlign: 'center', fontWeight: 900}}>
                     Enter your NAME:
                 </Text>
                 <Space size="xs" />
@@ -274,6 +292,7 @@ export default class Home extends Component<IProps, IState> {
                     maxLength={Constants.PLAYER_NAME_MAX}
                     onChange={this.handlePlayerNameChange}
                     style={{
+                        fontFamily: 'Consolas',
                         textAlign: 'center',
                         backgroundColor: 'black',
                         color: 'white',
@@ -282,7 +301,7 @@ export default class Home extends Component<IProps, IState> {
                 />
 
                 <Space size="xs" />
-                <Text style={{textAlign: 'center', fontWeight:900}}>
+                <Text style={{fontFamily: 'Consolas', fontSize: '18px', textAlign: 'center', fontWeight: 900}}>
                     Choose your HERO:
                 </Text>
                 <Space size="xs" />
@@ -296,6 +315,18 @@ export default class Home extends Component<IProps, IState> {
                     <Icon color='blue' handlePlayerEmojiChange={this.handlePlayerEmojiChange} playerEmoji={this.state.playerEmoji} playerAbility='shoot'>&#129497;</Icon>
                     <Icon color='red' handlePlayerEmojiChange={this.handlePlayerEmojiChange} playerEmoji={this.state.playerEmoji} playerAbility='invisibility'>&#129499;</Icon>
                     <Icon color='green'handlePlayerEmojiChange={this.handlePlayerEmojiChange} playerEmoji={this.state.playerEmoji} playerAbility='charge'>&#129423;</Icon>
+                </View>
+                <Space size="xs" />
+                <View                
+                    flex
+                    center
+                    style={{
+                        justifyContent: 'space-between'
+                    }}
+                >
+                <Box style={infoStyle}>Shoot<p style={{fontFamily: 'Consolas',fontSize: '14px'}}>Hurts chargers</p></Box>
+                <Box style={infoStyle}>Inviz<p style={{fontFamily: 'Consolas',fontSize: '14px'}}>Hurts shooters</p></Box>
+                <Box style={infoStyle}>Charge<p style={{fontFamily: 'Consolas',fontSize: '14px'}}>Hurts hard</p></Box>
                 </View>
                 {/* {this.state.hasNameChanged && this.state.playerName && (
                     <>
@@ -343,12 +374,13 @@ export default class Home extends Component<IProps, IState> {
                         text="+ New Room"
                         onClick={() => this.setState({ isNewRoom: true })}
                         style={{
+                            fontFamily: 'Consolas',
                             fontWeight: 900
                         }}
                     />
                 )}
                 {isNewRoom && (
-                    <View style={{ width: '100%' }}>
+                    <View style={{fontFamily: 'Consolas', width: '100%' }}>
                         {/* Name */}
                         <Text>Name:</Text>
                         <Space size="xxs" />
@@ -357,7 +389,7 @@ export default class Home extends Component<IProps, IState> {
                             value={roomName}
                             maxLength={Constants.ROOM_NAME_MAX}
                             onChange={this.handleRoomNameChange}
-                            style={{backgroundColor: '#efefef'}}
+                            style={{fontFamily: 'Consolas', backgroundColor: '#efefef'}}
                         />
                         <Space size="s" />
 

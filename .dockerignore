@@ -1,5 +1,6 @@
 .editorconfig
 .gitignore
+.vscode
 README.
 yarn-error.log
 node_modules

@@ -60,8 +60,8 @@ The `-d` option will run the container in the background.
 
 You can also build the Docker image yourself:
 
-1. Build it with `docker build -t tosios .`
-2. Run it with `docker run -d -p 3001:3001 [IMAGE_ID]`
+1. Build it with `docker build -t moji-warz .`
+2. Run it with `docker run -d -p 3001:3001 moji-warz`
 
 The `-d` option will run the container in the background (recommended if you want to have access to your current terminal session).
 
@@ -97,6 +97,12 @@ If you encounter a **white screen** the first time you try to load the game in t
 In development, the `front` application is NOT served by the `server`, thus requiring you to access it through port `3000` instead of `3001` as seen before.
 
 In development changes made to `client` and `server` are live, except for the `common` module.
+
+## 🐋 Deployment
+
+You can easily deploy the Docker image created during development to Heroku by following the following steps:
+
+https://devcenter.heroku.com/articles/container-registry-and-runtime
 
 ## Project architecture
 

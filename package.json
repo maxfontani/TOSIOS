@@ -15,10 +15,6 @@
       "packages/*"
     ]
   },
-  "engines": {
-    "node": "14.x",
-    "yarn": "1.22.x"
-  },
   "scripts": {
     "clean:dependencies": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' +",
     "clean:builds": "find . -name \"build\" -type d -prune -exec rm -rf '{}' +",
@@ -34,7 +30,8 @@
     "build:server": "yarn workspace @tosios/server build",
     "build:move": "cp -R ./packages/client/build ./packages/server/build/public",
     "build": "yarn build:common && yarn build:client && yarn build:server && yarn build:move",
-    "serve": "yarn workspace @tosios/server serve"
+    "serve": "yarn workspace @tosios/server serve",
+    "dev": "nodemon packages/server/src/index.ts"
   },
   "dependencies": {
     "concurrently": "^4.1.1"

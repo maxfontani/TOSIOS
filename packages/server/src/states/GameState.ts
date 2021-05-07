@@ -322,8 +322,6 @@ export class GameState extends Schema {
     private playerShoot(id: string, ts: number, angle: number) {
         const player = this.players.get(id);
 
-        console.log('SERV SHOOT ABIL ', player.ability);
-
         // !player.isAlive || 
         if (!player || this.game.state !== 'game') {
             return;

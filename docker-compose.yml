@@ -1,9 +1,10 @@
-version: "3.7"	
+version: "3.7"
 
-services:	
-  tosios:	
-    image: halftheopposite/tosios	
-    container_name: tosios	
-    restart: always	
-    ports:	
+services:
+  moji-app:
+    image: moji-warz
+    ports:
       - 3001:3001
+    volumes:
+        - ./:/usr/src/app
+    container_name: moji-warz-container
